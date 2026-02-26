@@ -961,6 +961,12 @@ function showToast(message, type = '') {
 
 // ===== 事件綁定 =====
 document.getElementById('btn-draw').addEventListener('click', drawQuestion);
+document.getElementById('category-select').addEventListener('change', function() {
+  // Auto-draw a question when category changes, if game has started
+  if (state.drawnCount > 0 || getAllQuestions().length > 0) {
+    drawQuestion();
+  }
+});
 document.getElementById('btn-pass').addEventListener('click', passQuestion);
 document.getElementById('btn-next-turn').addEventListener('click', nextTurn);
 document.getElementById('btn-add-player').addEventListener('click', addPlayer);
