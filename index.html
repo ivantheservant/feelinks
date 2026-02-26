@@ -311,15 +311,57 @@
       </div>
     </div>
     
-    <div class="card">
-      <h2>ℹ️ 關於此版本</h2>
-      <p>這是 Feelinks 的 AI 智能版，支持：</p>
-      <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
-        <li>📁 多個 Profile 管理</li>
-        <li>🤖 AI 自動生成問題</li>
-        <li>📋 重用通用問題分類</li>
-        <li>☁️ 雲端儲存（Google Sheets）</li>
-      </ul>
+    <div class="card" style="border-left: 4px solid var(--primary);">
+      <h2>📖 什麼是 Profile？</h2>
+      <p style="color: var(--text-light); margin-bottom: 16px; line-height: 1.7;">
+        <b>Profile</b> 是一套為特定小組度身訂造的問題集合。<br>
+        每個小組背景不同，問題也應該不同——家庭聚會、青年團契、夫婦小組都有各自的關注點和語言風格。
+      </p>
+
+      <div style="display:grid; gap:10px; margin-bottom:16px;">
+        <div style="background:#F0F2FF; border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start;">
+          <span style="font-size:1.4em;">📁</span>
+          <div>
+            <b style="color:var(--primary);">Profile = 一個小組的問題庫</b>
+            <p style="font-size:0.88em; color:var(--text-light); margin-top:3px;">每個 Profile 有自己的問題分類、語言設定和描述，可以隨時切換。</p>
+          </div>
+        </div>
+        <div style="background:#F0F2FF; border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start;">
+          <span style="font-size:1.4em;">🤖</span>
+          <div>
+            <b style="color:var(--primary);">AI 根據你的小組生成問題</b>
+            <p style="font-size:0.88em; color:var(--text-light); margin-top:3px;">告訴 AI 你的小組背景、主題和分類，它會生成貼合的「當…時，你感覺？」問題。</p>
+          </div>
+        </div>
+        <div style="background:#F0F2FF; border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start;">
+          <span style="font-size:1.4em;">📋</span>
+          <div>
+            <b style="color:var(--primary);">通用問題分類可以直接重用</b>
+            <p style="font-size:0.88em; color:var(--text-light); margin-top:3px;">系統有 12 個現成分類（家庭、信仰、情緒等），勾選後直接加入新 Profile，不需要重新生成。</p>
+          </div>
+        </div>
+        <div style="background:#F0F2FF; border-radius:10px; padding:12px 14px; display:flex; gap:12px; align-items:flex-start;">
+          <span style="font-size:1.4em;">☁️</span>
+          <div>
+            <b style="color:var(--primary);">所有問題儲存在 Google Sheets</b>
+            <p style="font-size:0.88em; color:var(--text-light); margin-top:3px;">可以在 Sheets 直接查看、修改或刪除問題，也可以用側邊欄管理 Profile。</p>
+          </div>
+        </div>
+      </div>
+
+      <details style="cursor:pointer;">
+        <summary style="font-weight:600; color:var(--primary); padding:4px 0; font-size:0.95em;">💡 Profile 創建建議</summary>
+        <div style="margin-top:12px; font-size:0.9em; color:#444; line-height:1.9;">
+          <p><b>➤ 建議一個小組建立一個 Profile</b><br>
+          例如「以諾團2025」「Ivan家庭」，按年份或小組名命名，方便以後識別。</p>
+          <p style="margin-top:8px;"><b>➤ 先勾選通用分類，再開啟 AI 生成額外問題</b><br>
+          通用分類涵蓋家庭、信仰、情緒等基本主題，適合大部分小組。AI 則用來補充你小組獨特的背景。</p>
+          <p style="margin-top:8px;"><b>➤ AI 生成建議填寫「參與者背景」和「主題/目的」</b><br>
+          填得越具體，問題越貼合。例如「45-55歲夫婦，有青少年子女，香港移民背景」比「成人」效果好得多。</p>
+          <p style="margin-top:8px;"><b>➤ 問題分類欄位可以中英夾雜</b><br>
+          輸入如「學業壓力, 朋友關係, faith」，AI 會自動理解意思並轉為繁體中文分類名稱。</p>
+        </div>
+      </details>
     </div>
   </div>
   
@@ -331,7 +373,8 @@
       <form id="create-form">
         <div class="form-group">
           <label>Profile 名稱 *</label>
-          <input type="text" id="profile-name" placeholder="例：青年團契2025" required>
+          <input type="text" id="profile-name" placeholder="例：青年團契2025、Ivan家庭、以諾團V2" required>
+          <p class="hint">建議用小組名稱 + 年份命名，方便日後識別</p>
         </div>
         
         <div class="form-group">
@@ -360,13 +403,14 @@
         
         <div class="form-group">
           <label>簡短描述</label>
-          <input type="text" id="profile-description" placeholder="例：45-55歲夫婦，有青少年子女">
+          <input type="text" id="profile-description" placeholder="例：45-55歲夫婦，有青少年子女，香港移民背景">
+          <p class="hint">這個描述會傳給 AI，幫助生成更貼合的問題</p>
         </div>
         
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #EEE;">
         
         <h3>📚 選擇通用問題分類</h3>
-        <p class="hint">勾選要包含的通用問題分類</p>
+        <p class="hint">這 12 個分類來自系統預設問題庫，直接勾選即可加入 Profile。預設全選，不需要的取消勾選。</p>
         <div id="general-categories" class="checkbox-group">
           <div class="loading">
             <div class="loading-spinner"></div>
@@ -376,6 +420,7 @@
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #EEE;">
         
         <h3>🤖 AI 生成問題（選填）</h3>
+        <p class="hint" style="margin-bottom:10px;">勾選「啟用 AI 生成」後，AI 會根據你的小組背景生成客製化問題，與上方通用問題合併成完整 Profile。</p>
         
         <div class="form-group">
           <label>
@@ -410,7 +455,7 @@
           <div class="form-group">
             <label>問題分類</label>
             <textarea id="ai-categories" placeholder="例：近日心情、家庭狀況、困難、開心的事、信仰反思..."></textarea>
-            <p class="hint">AI 會將問題分到這些類別；留空則自動創建</p>
+            <p class="hint">用逗號分隔，可中英混合。例：「學業壓力, 朋友關係, faith, 未來方向」<br>AI 會理解意思並轉為繁體中文分類；留空則 AI 自行決定分類。</p>
           </div>
         </div>
         
@@ -543,7 +588,7 @@
 </main>
 
 <footer class="footer">
-  Feelinks AI · ECF Holy Word Church | 2025
+  Powered by <a href="https://agapeinterlink.com" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 600;">Agape Interlink</a>
 </footer>
 
 <!-- Toast -->
@@ -633,15 +678,22 @@ async function loadProfiles() {
     return;
   }
   
-  container.innerHTML = result.profiles.map(p => `
+  const visibleProfiles = result.profiles.filter(p => !p.hidden);
+  
+  if (visibleProfiles.length === 0) {
+    container.innerHTML = '<p style="color: var(--text-light);">所有 Profile 均已隱藏。可在 Google Sheets 側邊欄重新顯示。</p>';
+    return;
+  }
+  
+  container.innerHTML = visibleProfiles.map(p => `
     <div class="profile-card" onclick="loadProfile('${p.id}')">
       <div class="info">
         <h4>${p.name}</h4>
-        <p>${p.type || ''} ${p.description || ''}</p>
+        <p>${[p.type, p.description].filter(Boolean).join(' · ')}</p>
       </div>
       <div class="meta">
-        <div>${p.questionCount} 題</div>
-        <div>${p.language}</div>
+        <div style="font-size:1.1em; font-weight:600; color:var(--primary);">${p.questionCount} 題</div>
+        <div style="font-size:0.8em;">${p.language}</div>
       </div>
     </div>
   `).join('');
