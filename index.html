@@ -739,7 +739,13 @@ document.getElementById('create-form').addEventListener('submit', async function
   btn.textContent = '✨ 創建 Profile';
   
   if (result.success) {
-    showToast('創建成功！共 ' + result.questionCount + ' 題', 'success');
+    let msg = '創建成功！共 ' + result.questionCount + ' 題';
+    if (result.aiError) {
+      msg += '（⚠️ AI 生成失敗: ' + result.aiError + '）';
+      showToast(msg, 'error');
+    } else {
+      showToast(msg, 'success');
+    }
     document.getElementById('create-form').reset();
     loadProfile(result.profileId);
   } else {
