@@ -104,20 +104,25 @@
     .form-group textarea { min-height: 80px; resize: vertical; }
     .form-group .hint { font-size: 0.85em; color: var(--text-light); margin-top: 5px; }
     
-    .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+    .checkbox-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
     .checkbox-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 12px;
+      padding: 7px 12px;
       background: #F5F5F5;
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      border: 2px solid transparent;
+      user-select: none;
     }
-    .checkbox-item:hover { background: #E8E8E8; }
-    .checkbox-item.selected { background: var(--primary); color: white; }
-    .checkbox-item input { display: none; }
+    .checkbox-item:hover { background: #E8E8E8; border-color: var(--primary); }
+    .checkbox-item.selected { background: #EEF0FB; border-color: var(--primary); color: var(--primary); font-weight: 600; }
+    .checkbox-item input[type="checkbox"] {
+      width: 16px; height: 16px; accent-color: var(--primary);
+      cursor: pointer; flex-shrink: 0;
+    }
     
     .profile-card {
       display: flex;
@@ -676,25 +681,18 @@ async function loadGeneralCategories() {
   }
   
   container.innerHTML = result.categories.map(c => `
-    <label class="checkbox-item">
+    <label class="checkbox-item selected">
       <input type="checkbox" name="general-cat" value="${c.name}" checked>
       ${c.name} (${c.count}題)
     </label>
   `).join('');
   
-  // 點擊切換樣式
+  // Sync .selected class whenever checkbox state changes
   container.querySelectorAll('.checkbox-item').forEach(item => {
-    item.addEventListener('click', function(e) {
-      if (e.target.tagName !== 'INPUT') {
-        const cb = this.querySelector('input');
-        cb.checked = !cb.checked;
-      }
-      this.classList.toggle('selected', this.querySelector('input').checked);
+    const cb = item.querySelector('input');
+    cb.addEventListener('change', function() {
+      item.classList.toggle('selected', this.checked);
     });
-    // 初始狀態
-    if (item.querySelector('input').checked) {
-      item.classList.add('selected');
-    }
   });
 }
 
@@ -724,12 +722,13 @@ document.getElementById('create-form').addEventListener('submit', async function
   if (document.getElementById('enable-ai').checked) {
     data.generateAI = true;
     data.aiSettings = {
-      language: data.language,
+      language:      data.language,
       questionCount: parseInt(document.getElementById('ai-count').value),
-      groupType: data.type,
-      audience: document.getElementById('ai-audience').value,
-      theme: document.getElementById('ai-theme').value,
-      categories: document.getElementById('ai-categories').value
+      groupType:     data.type,
+      description:   data.description,
+      audience:      document.getElementById('ai-audience').value,
+      theme:         document.getElementById('ai-theme').value,
+      categories:    document.getElementById('ai-categories').value
     };
   }
   
