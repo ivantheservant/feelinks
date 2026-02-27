@@ -153,7 +153,7 @@
     .chip {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       padding: 8px 14px;
       background: #FBE9E7;
       border: 2px solid transparent;
@@ -165,12 +165,19 @@
     }
     .chip:hover { border-color: var(--primary-light); }
     .chip.selected { background: #FFCCBC; border-color: var(--primary); color: var(--primary-dark); font-weight: 600; }
-    .chip input[type="checkbox"] { display: none; }
+    .chip input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--primary);
+      cursor: pointer;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
 
     /* ===== Radio Chips ===== */
     .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .radio-chip {
-      padding: 10px 18px;
+      padding: 10px 18px 10px 14px;
       background: #FBE9E7;
       border: 2px solid transparent;
       border-radius: 25px;
@@ -178,9 +185,28 @@
       transition: all 0.2s;
       user-select: none;
       font-size: 0.9em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .radio-chip::before {
+      content: '';
+      width: 18px;
+      height: 18px;
+      border: 2px solid #BCAAA4;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: all 0.2s;
+      background: white;
     }
     .radio-chip:hover { border-color: var(--primary-light); }
+    .radio-chip:hover::before { border-color: var(--primary-light); }
     .radio-chip.selected { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
+    .radio-chip.selected::before {
+      border-color: white;
+      background: white;
+      box-shadow: inset 0 0 0 4px var(--primary);
+    }
 
     /* ===== Buttons ===== */
     .btn {
