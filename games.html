@@ -567,27 +567,27 @@
         <div class="form-group">
           <label>特別限制（可多選）Restrictions</label>
           <div class="chip-group" id="cg-restrictions">
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免男女身體接觸">
               🚫 避免男女身體接觸
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="盡量不用道具（如需要只用日常物品）">
               📦 盡量不用道具
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免劇烈運動">
               🏃 避免劇烈運動
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="適合行動不便者參與">
               ♿ 適合行動不便者
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免需要閱讀或書寫的遊戲">
               ✏️ 避免閱讀/書寫
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免尷尬或太私密的互動">
               😳 避免尷尬互動
             </label>
@@ -623,22 +623,22 @@
         <div class="form-group">
           <label>活動目的（可多選）</label>
           <div class="chip-group" id="cg-purposes">
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="破冰認識"> 🧊 破冰認識
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="增進感情"> 💕 增進感情
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="信仰反思"> ✝️ 信仰反思
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="團隊合作"> 🤝 團隊合作
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="純粹好玩"> 🎉 純粹好玩
             </label>
-            <label class="chip" onclick="toggleChip(this)">
+            <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="價值觀探索"> 💡 價值觀探索
             </label>
           </div>
@@ -1167,7 +1167,8 @@ function selectRadio(el) {
 }
 
 // ===== Checkbox Chips =====
-function toggleChip(el) {
+function toggleChip(el, event) {
+  if (event) event.preventDefault(); // stop browser double-firing label→checkbox
   el.classList.toggle('selected');
   const cb = el.querySelector('input[type="checkbox"]');
   if (cb) cb.checked = el.classList.contains('selected');
