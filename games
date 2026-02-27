@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>🎯 團建遊戲生成器 Game Generator</title>
+  <style>
+    :root {
+      --primary: #E64A19;
+      --primary-dark: #BF360C;
+      --primary-light: #FF8A65;
+      --accent: #FF6D00;
+      --success: #43A047;
+      --warning: #FFA000;
+      --danger: #D32F2F;
+      --bg: #FFF8F0;
+      --card-bg: #FFFFFF;
+      --text: #3E2723;
+      --text-light: #795548;
+      --text-muted: #A1887F;
+      --border: #FFCCBC;
+      --step-inactive: #D7CCC8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ===== Header ===== */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(230, 74, 25, 0.3);
+    }
+    .header h1 { font-size: 1.6em; margin-bottom: 4px; }
+    .header p { opacity: 0.9; font-size: 0.85em; }
+    .header-nav { display: flex; justify-content: center; gap: 15px; margin-top: 12px; }
+    .header-nav a {
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font-size: 0.85em;
+      padding: 5px 12px;
+      border-radius: 20px;
+      transition: all 0.2s;
+    }
+    .header-nav a:hover, .header-nav a.active {
+      background: rgba(255,255,255,0.2);
+      color: white;
+    }
+
+    .main-content { padding: 20px; max-width: 800px; margin: 0 auto; }
+
+    /* ===== Views ===== */
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* ===== Cards ===== */
+    .card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(62, 39, 35, 0.06);
+      border: 1px solid rgba(255, 204, 188, 0.3);
+    }
+    .card h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.25em; }
+    .card h3 { color: var(--text); margin: 18px 0 10px; font-size: 1.05em; }
+
+    /* ===== Step Progress Bar ===== */
+    .step-progress {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      position: relative;
+    }
+    .step-progress::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 30px;
+      right: 30px;
+      height: 3px;
+      background: var(--step-inactive);
+      z-index: 0;
+    }
+    .step-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 1;
+      cursor: pointer;
+    }
+    .step-circle {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--step-inactive);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85em;
+      transition: all 0.3s;
+      margin-bottom: 6px;
+    }
+    .step-item.active .step-circle { background: var(--primary); transform: scale(1.1); box-shadow: 0 3px 10px rgba(230, 74, 25, 0.3); }
+    .step-item.done .step-circle { background: var(--success); }
+    .step-label { font-size: 0.7em; color: var(--text-muted); text-align: center; max-width: 70px; }
+    .step-item.active .step-label { color: var(--primary); font-weight: 600; }
+
+    /* ===== Forms ===== */
+    .form-group { margin-bottom: 18px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      color: var(--text-light);
+      font-size: 0.92em;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-size: 1em;
+      transition: border-color 0.2s;
+      background: white;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-group .hint { font-size: 0.82em; color: var(--text-muted); margin-top: 5px; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+
+    /* ===== Checkbox Chips ===== */
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: #FBE9E7;
+      border: 2px solid transparent;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      font-size: 0.9em;
+    }
+    .chip:hover { border-color: var(--primary-light); }
+    .chip.selected { background: #FFCCBC; border-color: var(--primary); color: var(--primary-dark); font-weight: 600; }
+    .chip input[type="checkbox"] { display: none; }
+
+    /* ===== Radio Chips ===== */
+    .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .radio-chip {
+      padding: 10px 18px;
+      background: #FBE9E7;
+      border: 2px solid transparent;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      font-size: 0.9em;
+    }
+    .radio-chip:hover { border-color: var(--primary-light); }
+    .radio-chip.selected { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(230, 74, 25, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230, 74, 25, 0.4); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: var(--text-light); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: #FBE9E7; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-small { padding: 8px 16px; font-size: 0.9em; }
+    .btn-full { width: 100%; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+
+    /* ===== Step Navigation ===== */
+    .step-nav { display: flex; justify-content: space-between; margin-top: 25px; }
+
+    /* ===== Conditional Section ===== */
+    .conditional { display: none; margin-top: 12px; padding: 15px; background: #FFF3E0; border-radius: 10px; border-left: 4px solid var(--warning); }
+    .conditional.show { display: block; }
+
+    /* ===== Loading ===== */
+    .loading { text-align: center; padding: 50px 20px; }
+    .loading-spinner {
+      width: 50px; height: 50px;
+      border: 5px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: var(--text-light); font-size: 1.05em; }
+    .loading-sub { color: var(--text-muted); font-size: 0.85em; margin-top: 8px; }
+
+    /* ===== Result Display ===== */
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #FFF3E0;
+      border-radius: 12px;
+    }
+    .result-content {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 25px;
+      line-height: 1.8;
+      font-size: 0.95em;
+    }
+    .result-content h1 { color: var(--primary-dark); margin: 25px 0 12px; font-size: 1.5em; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+    .result-content h2 { color: var(--primary); margin: 20px 0 10px; font-size: 1.25em; }
+    .result-content h3 { color: var(--text); margin: 15px 0 8px; font-size: 1.05em; }
+    .result-content table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    .result-content th, .result-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .result-content th { background: #FBE9E7; color: var(--primary-dark); font-weight: 600; }
+    .result-content hr { border: none; border-top: 2px solid var(--border); margin: 25px 0; }
+    .result-content ol, .result-content ul { padding-left: 22px; margin: 8px 0; }
+    .result-content li { margin-bottom: 5px; }
+    .result-content blockquote { border-left: 4px solid var(--primary-light); padding: 10px 15px; margin: 10px 0; background: #FFF8F0; }
+
+    /* ===== Markdown Raw View ===== */
+    .markdown-raw {
+      background: #263238;
+      color: #ECEFF1;
+      border-radius: 10px;
+      padding: 20px;
+      font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+      font-size: 0.85em;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    /* ===== History List ===== */
+    .history-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      background: #FFF3E0;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+    .history-card:hover { background: #FFE0B2; border-color: var(--primary-light); transform: translateX(4px); }
+    .history-card .info h4 { color: var(--primary-dark); margin-bottom: 4px; }
+    .history-card .info p { font-size: 0.82em; color: var(--text-muted); }
+    .history-card .meta { text-align: right; font-size: 0.82em; color: var(--text-muted); }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #333;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      max-width: 90%;
+    }
+    .toast.show { opacity: 1; }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    /* ===== Toggle Switch ===== */
+    .toggle-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+    .toggle-label { font-weight: 500; }
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: #D7CCC8;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle.on { background: var(--primary); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .toggle.on::after { transform: translateX(24px); }
+
+    /* ===== View Toggle for Results ===== */
+    .view-toggle {
+      display: flex;
+      background: #FBE9E7;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .view-toggle-btn {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 500;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .view-toggle-btn.active { background: var(--primary); color: white; }
+
+    /* ===== Email Modal ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    }
+    .modal h3 { color: var(--primary); margin-bottom: 15px; }
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>🎯 團建遊戲生成器</h1>
+  <p>Team Building Game Generator</p>
+  <div class="header-nav">
+    <a href="#" class="active" onclick="showView('create')">✨ 新建</a>
+    <a href="#" onclick="showView('history')">📋 歷史記錄</a>
+    <a href="index.html" style="opacity:0.7">← 返回 Feelinks</a>
+  </div>
+</div>
+
+<div class="main-content">
+
+  <!-- ===================================================== -->
+  <!-- CREATE VIEW - Step Wizard -->
+  <!-- ===================================================== -->
+  <div class="view active" id="view-create">
+
+    <!-- Step Progress -->
+    <div class="step-progress" id="step-progress">
+      <div class="step-item active" data-step="1" onclick="goToStep(1)">
+        <div class="step-circle">1</div>
+        <div class="step-label">參加者</div>
+      </div>
+      <div class="step-item" data-step="2" onclick="goToStep(2)">
+        <div class="step-circle">2</div>
+        <div class="step-label">活動設定</div>
+      </div>
+      <div class="step-item" data-step="3" onclick="goToStep(3)">
+        <div class="step-circle">3</div>
+        <div class="step-label">特別要求</div>
+      </div>
+      <div class="step-item" data-step="4" onclick="goToStep(4)">
+        <div class="step-circle">4</div>
+        <div class="step-label">目的</div>
+      </div>
+      <div class="step-item" data-step="5" onclick="goToStep(5)">
+        <div class="step-circle">5</div>
+        <div class="step-label">確認</div>
+      </div>
+    </div>
+
+    <!-- STEP 1: Participants -->
+    <div class="step-content" id="step-1">
+      <div class="card">
+        <h2>👥 參加者資料 Participants</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>年齡範圍 Age Range</label>
+            <input type="text" id="f-ageRange" placeholder="例如：45-55" value="">
+          </div>
+          <div class="form-group">
+            <label>預計人數 Headcount</label>
+            <input type="text" id="f-participantCount" placeholder="例如：20-30" value="">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>參加者關係 Relationship</label>
+          <div class="radio-group" id="rg-relationship">
+            <div class="radio-chip" data-value="夫婦" onclick="selectRadio(this)">💑 夫婦</div>
+            <div class="radio-chip" data-value="朋友" onclick="selectRadio(this)">🤝 朋友</div>
+            <div class="radio-chip" data-value="同事" onclick="selectRadio(this)">💼 同事</div>
+            <div class="radio-chip" data-value="教會弟兄姊妹" onclick="selectRadio(this)">⛪ 教會弟兄姊妹</div>
+            <div class="radio-chip" data-value="混合" onclick="selectRadio(this)">🌈 混合</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>熟悉程度 Familiarity</label>
+          <div class="radio-group" id="rg-familiarity">
+            <div class="radio-chip" data-value="初次見面" onclick="selectRadio(this)">👋 初次見面</div>
+            <div class="radio-chip" data-value="認識但不熟" onclick="selectRadio(this)">🙂 認識但不熟</div>
+            <div class="radio-chip" data-value="熟悉" onclick="selectRadio(this)">😄 熟悉</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>是否包括兒童？ Include Children?</label>
+          <div class="toggle-row">
+            <div class="toggle" id="toggle-children" onclick="toggleChildren()"></div>
+            <span class="toggle-label" id="toggle-children-label">不包括兒童</span>
+          </div>
+          <div class="conditional" id="children-section">
+            <div class="form-group">
+              <label>兒童年齡範圍</label>
+              <input type="text" id="f-childrenAgeRange" placeholder="例如：7-16">
+            </div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <div></div>
+          <button class="btn btn-primary" onclick="goToStep(2)">下一步 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Activity Settings -->
+    <div class="step-content" id="step-2" style="display:none;">
+      <div class="card">
+        <h2>⚙️ 活動設定 Settings</h2>
+
+        <div class="form-group">
+          <label>場地 Venue</label>
+          <div class="radio-group" id="rg-venue">
+            <div class="radio-chip" data-value="室內" onclick="selectRadio(this)">🏠 室內 Indoor</div>
+            <div class="radio-chip" data-value="室外" onclick="selectRadio(this)">🌳 室外 Outdoor</div>
+            <div class="radio-chip" data-value="都可以" onclick="selectRadio(this)">🔄 都可以 Either</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>可用時間 Available Time</label>
+            <div class="radio-group" id="rg-time">
+              <div class="radio-chip" data-value="30分鐘" onclick="selectRadio(this)">30 min</div>
+              <div class="radio-chip" data-value="1小時" onclick="selectRadio(this)">1 hr</div>
+              <div class="radio-chip" data-value="1.5小時" onclick="selectRadio(this)">1.5 hr</div>
+              <div class="radio-chip" data-value="2小時以上" onclick="selectRadio(this)">2+ hr</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>遊戲數量 Number of Games</label>
+            <div class="radio-group" id="rg-gamecount">
+              <div class="radio-chip" data-value="2" onclick="selectRadio(this)">2</div>
+              <div class="radio-chip" data-value="3" onclick="selectRadio(this)">3</div>
+              <div class="radio-chip" data-value="4" onclick="selectRadio(this)">4</div>
+              <div class="radio-chip" data-value="5" onclick="selectRadio(this)">5</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>輸出語言 Language</label>
+          <div class="radio-group" id="rg-language">
+            <div class="radio-chip selected" data-value="繁體中文" onclick="selectRadio(this)">繁體中文</div>
+            <div class="radio-chip" data-value="English" onclick="selectRadio(this)">English</div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn btn-outline" onclick="goToStep(1)">← 上一步</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">下一步 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Special Requirements -->
+    <div class="step-content" id="step-3" style="display:none;">
+      <div class="card">
+        <h2>⚠️ 特別要求 Special Requirements</h2>
+
+        <div class="form-group">
+          <label>特別限制（可多選）Restrictions</label>
+          <div class="chip-group" id="cg-restrictions">
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="避免男女身體接觸">
+              🚫 避免男女身體接觸
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="盡量不用道具（如需要只用日常物品）">
+              📦 盡量不用道具
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="避免劇烈運動">
+              🏃 避免劇烈運動
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="適合行動不便者參與">
+              ♿ 適合行動不便者
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="避免需要閱讀或書寫的遊戲">
+              ✏️ 避免閱讀/書寫
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="避免尷尬或太私密的互動">
+              😳 避免尷尬互動
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>其他特別要求（自由輸入）</label>
+          <textarea id="f-otherRequirements" placeholder="例如：有一位輪椅使用者、場地比較小..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>分組要求 Grouping Rule</label>
+          <div class="radio-group" id="rg-grouping">
+            <div class="radio-chip" data-value="打散夫婦/家庭分開" onclick="selectRadio(this)">🔀 打散夫婦/家庭</div>
+            <div class="radio-chip" data-value="自由分組" onclick="selectRadio(this)">🎲 自由分組</div>
+            <div class="radio-chip" data-value="不分組" onclick="selectRadio(this)">👤 不分組</div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn btn-outline" onclick="goToStep(2)">← 上一步</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">下一步 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Purpose & Debrief -->
+    <div class="step-content" id="step-4" style="display:none;">
+      <div class="card">
+        <h2>🎯 活動目的 Purpose</h2>
+
+        <div class="form-group">
+          <label>活動目的（可多選）</label>
+          <div class="chip-group" id="cg-purposes">
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="破冰認識"> 🧊 破冰認識
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="增進感情"> 💕 增進感情
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="信仰反思"> ✝️ 信仰反思
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="團隊合作"> 🤝 團隊合作
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="純粹好玩"> 🎉 純粹好玩
+            </label>
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="價值觀探索"> 💡 價值觀探索
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>每個遊戲附帶反思分享問題？ Include Debrief?</label>
+          <div class="toggle-row">
+            <div class="toggle on" id="toggle-debrief" onclick="toggleDebrief()"></div>
+            <span class="toggle-label" id="toggle-debrief-label">包含反思問題（含聖經經文）</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>其他補充說明 Additional Notes</label>
+          <textarea id="f-additionalNotes" placeholder="例如：是退修會的其中一環、想讓大家更多認識彼此..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>📧 完成後寄送到 Email（選填）</label>
+          <input type="email" id="f-email" placeholder="your@email.com">
+          <div class="hint">生成完成後會自動發送遊戲手冊到此信箱</div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn btn-outline" onclick="goToStep(3)">← 上一步</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">確認 & 預覽 →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5: Confirm & Generate -->
+    <div class="step-content" id="step-5" style="display:none;">
+      <div class="card">
+        <h2>✅ 確認生成 Confirm</h2>
+        <div id="summary-content" style="line-height: 1.8;"></div>
+
+        <div class="step-nav" style="margin-top: 20px;">
+          <button class="btn btn-outline" onclick="goToStep(4)">← 修改</button>
+          <button class="btn btn-primary btn-full" id="btn-generate" onclick="generateGames()">
+            🎯 生成遊戲手冊
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GENERATING STATE -->
+    <div class="step-content" id="step-generating" style="display:none;">
+      <div class="card">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">🎯 AI 正在設計遊戲...</div>
+          <div class="loading-sub">通常需要 20-40 秒，請稍候</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT STATE -->
+    <div class="step-content" id="step-result" style="display:none;">
+      <div class="card" style="padding: 15px;">
+        <div class="result-actions">
+          <div class="view-toggle">
+            <button class="view-toggle-btn active" onclick="switchResultView('formatted', this)">📖 格式化</button>
+            <button class="view-toggle-btn" onclick="switchResultView('markdown', this)">📝 Markdown</button>
+          </div>
+          <button class="btn btn-small btn-outline" onclick="copyMarkdown()">📋 複製 Markdown</button>
+          <button class="btn btn-small btn-outline" onclick="openEmailModal()">📧 發送 Email</button>
+          <button class="btn btn-small btn-secondary" onclick="resetForm()">✨ 再生成一組</button>
+        </div>
+
+        <div id="result-formatted" class="result-content"></div>
+        <div id="result-markdown" class="markdown-raw" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================================================== -->
+  <!-- HISTORY VIEW -->
+  <!-- ===================================================== -->
+  <div class="view" id="view-history">
+    <div class="card">
+      <h2>📋 歷史記錄 History</h2>
+      <div id="history-list">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <div class="loading-text">載入中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- EMAIL MODAL -->
+<div class="modal-overlay" id="email-modal">
+  <div class="modal">
+    <h3>📧 發送遊戲手冊</h3>
+    <div class="form-group">
+      <label>Email 地址</label>
+      <input type="email" id="modal-email" placeholder="your@email.com">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="sendEmail()">📧 發送</button>
+      <button class="btn btn-outline" onclick="closeEmailModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== Configuration =====
+const API_URL = 'https://script.google.com/macros/s/AKfycbzP6lD_L7dU3df2JJ78cP4nAamnawAyxaoIR-PxOToBZncf4-FHicmY2zXXZEwW2GpM/exec';
+
+// ===== State =====
+let currentStep = 1;
+let includeChildren = false;
+let includeDebrief = true;
+let currentGameSetId = null;
+let currentMarkdown = '';
+
+// ===== View Switching =====
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+
+  // Update nav active state
+  document.querySelectorAll('.header-nav a').forEach(a => a.classList.remove('active'));
+  event.target.classList.add('active');
+
+  if (name === 'history') loadHistory();
+}
+
+// ===== Step Navigation =====
+function goToStep(step) {
+  if (step === 5) buildSummary();
+
+  // Hide all step contents
+  document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
+  document.getElementById('step-' + step).style.display = 'block';
+
+  // Update progress bar
+  document.querySelectorAll('.step-item').forEach(item => {
+    const s = parseInt(item.dataset.step);
+    item.classList.remove('active', 'done');
+    if (s === step) item.classList.add('active');
+    else if (s < step) item.classList.add('done');
+  });
+
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ===== Radio Chips =====
+function selectRadio(el) {
+  const group = el.parentElement;
+  group.querySelectorAll('.radio-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ===== Checkbox Chips =====
+function toggleChip(el) {
+  el.classList.toggle('selected');
+  const cb = el.querySelector('input[type="checkbox"]');
+  if (cb) cb.checked = el.classList.contains('selected');
+}
+
+// ===== Toggles =====
+function toggleChildren() {
+  includeChildren = !includeChildren;
+  const toggle = document.getElementById('toggle-children');
+  const label = document.getElementById('toggle-children-label');
+  const section = document.getElementById('children-section');
+
+  toggle.classList.toggle('on', includeChildren);
+  label.textContent = includeChildren ? '包括兒童 ✓' : '不包括兒童';
+  section.classList.toggle('show', includeChildren);
+}
+
+function toggleDebrief() {
+  includeDebrief = !includeDebrief;
+  const toggle = document.getElementById('toggle-debrief');
+  const label = document.getElementById('toggle-debrief-label');
+
+  toggle.classList.toggle('on', includeDebrief);
+  label.textContent = includeDebrief ? '包含反思問題（含聖經經文）' : '不包含反思問題';
+}
+
+// ===== Get Form Values =====
+function getSelectedRadio(groupId) {
+  const selected = document.querySelector('#' + groupId + ' .radio-chip.selected');
+  return selected ? selected.dataset.value : '';
+}
+
+function getSelectedChips(groupId) {
+  const chips = document.querySelectorAll('#' + groupId + ' .chip.selected');
+  return Array.from(chips).map(c => c.querySelector('input').value);
+}
+
+function getFormData() {
+  const restrictions = getSelectedChips('cg-restrictions');
+  const otherReq = document.getElementById('f-otherRequirements').value.trim();
+  const allRequirements = restrictions.concat(otherReq ? [otherReq] : []).join('；');
+
+  return {
+    ageRange: document.getElementById('f-ageRange').value.trim(),
+    participantCount: document.getElementById('f-participantCount').value.trim(),
+    relationship: getSelectedRadio('rg-relationship'),
+    familiarity: getSelectedRadio('rg-familiarity'),
+    includeChildren: includeChildren ? 'yes' : 'no',
+    childrenAgeRange: includeChildren ? document.getElementById('f-childrenAgeRange').value.trim() : '',
+    venue: getSelectedRadio('rg-venue'),
+    availableTime: getSelectedRadio('rg-time'),
+    gameCount: getSelectedRadio('rg-gamecount') || '3',
+    language: getSelectedRadio('rg-language') || '繁體中文',
+    specialRequirements: allRequirements,
+    groupingRule: getSelectedRadio('rg-grouping'),
+    purposes: getSelectedChips('cg-purposes').join('、'),
+    includeDebrief: includeDebrief ? 'yes' : 'no',
+    additionalNotes: document.getElementById('f-additionalNotes').value.trim(),
+    email: document.getElementById('f-email').value.trim()
+  };
+}
+
+// ===== Summary =====
+function buildSummary() {
+  const d = getFormData();
+  const lines = [];
+
+  const addLine = (icon, label, value) => {
+    if (value) lines.push(`<div style="margin:6px 0;"><strong>${icon} ${label}：</strong>${value}</div>`);
+  };
+
+  addLine('👥', '年齡範圍', d.ageRange);
+  addLine('💑', '關係', d.relationship);
+  addLine('🔢', '人數', d.participantCount);
+  addLine('🤝', '熟悉程度', d.familiarity);
+  if (d.includeChildren === 'yes') {
+    addLine('👶', '兒童', `包括（${d.childrenAgeRange} 歲）`);
+  }
+  addLine('🏠', '場地', d.venue);
+  addLine('⏱️', '時間', d.availableTime);
+  addLine('🎮', '遊戲數量', d.gameCount);
+  addLine('🌐', '語言', d.language);
+  if (d.specialRequirements) addLine('⚠️', '特別要求', d.specialRequirements);
+  addLine('🔀', '分組', d.groupingRule);
+  addLine('🎯', '目的', d.purposes);
+  addLine('💬', '反思問題', d.includeDebrief === 'yes' ? '包含' : '不包含');
+  if (d.additionalNotes) addLine('📝', '補充', d.additionalNotes);
+  if (d.email) addLine('📧', 'Email', d.email);
+
+  document.getElementById('summary-content').innerHTML = lines.join('');
+}
+
+// ===== Generate =====
+function generateGames() {
+  const data = getFormData();
+  data.action = 'generateGames';
+
+  // Show loading
+  document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
+  document.getElementById('step-generating').style.display = 'block';
+
+  // API call via GET (encode data as JSON in URL param)
+  const url = API_URL + '?action=generateGames&data=' + encodeURIComponent(JSON.stringify(data));
+
+  fetch(url)
+    .then(r => r.json())
+    .then(result => {
+      if (result.success) {
+        currentGameSetId = result.gameSetId;
+        currentMarkdown = result.markdownContent;
+        showResult(result.markdownContent);
+
+        if (result.emailError) {
+          showToast('遊戲已生成，但 Email 發送失敗：' + result.emailError, 'error');
+        } else if (data.email) {
+          showToast('✅ 遊戲手冊已發送到 ' + data.email, 'success');
+        }
+      } else {
+        showToast('生成失敗：' + result.error, 'error');
+        goToStep(5);
+      }
+    })
+    .catch(err => {
+      showToast('網絡錯誤：' + err.message, 'error');
+      goToStep(5);
+    });
+}
+
+// ===== Show Result =====
+function showResult(markdown) {
+  document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
+  document.getElementById('step-result').style.display = 'block';
+  document.getElementById('step-progress').style.display = 'none';
+
+  // Render formatted version
+  document.getElementById('result-formatted').innerHTML = renderMarkdown(markdown);
+  // Show raw markdown
+  document.getElementById('result-markdown').textContent = markdown;
+}
+
+function switchResultView(view, btn) {
+  document.querySelectorAll('.view-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.getElementById('result-formatted').style.display = view === 'formatted' ? 'block' : 'none';
+  document.getElementById('result-markdown').style.display = view === 'markdown' ? 'block' : 'none';
+}
+
+// ===== Simple Markdown Renderer =====
+function renderMarkdown(md) {
+  let html = md;
+
+  // Escape HTML (preserve markdown)
+  html = html.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // Headers
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Bold
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+  // Italic
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+  // HR
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Tables
+  const tableRegex = /(\|.+\|[\r\n]+)+/g;
+  html = html.replace(tableRegex, function(tableBlock) {
+    const rows = tableBlock.trim().split('\n').filter(r => r.trim());
+    if (rows.length < 2) return tableBlock;
+
+    let tableHtml = '<table>';
+    rows.forEach((row, idx) => {
+      const cells = row.split('|').filter(c => c.trim());
+      // Skip separator rows
+      if (cells.every(c => c.trim().match(/^[-:]+$/))) return;
+
+      const tag = idx === 0 ? 'th' : 'td';
+      tableHtml += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+    });
+    tableHtml += '</table>';
+    return tableHtml;
+  });
+
+  // Ordered lists
+  html = html.replace(/^(\d+)\.\s+(.+)$/gm, '<li data-num="$1">$2</li>');
+
+  // Unordered lists
+  html = html.replace(/^[-•✔☐]\s+(.+)$/gm, '<li>$1</li>');
+
+  // Wrap consecutive <li> in <ol>/<ul>
+  html = html.replace(/(<li[^>]*>[\s\S]*?<\/li>\n?)+/g, function(match) {
+    if (match.includes('data-num=')) {
+      return '<ol>' + match.replace(/ data-num="\d+"/g, '') + '</ol>';
+    }
+    return '<ul>' + match + '</ul>';
+  });
+
+  // Paragraphs - lines that aren't HTML tags
+  html = html.replace(/^(?!<[a-z/]|$)(.+)$/gm, '<p>$1</p>');
+
+  // Clean up empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, '');
+
+  return html;
+}
+
+// ===== Copy & Email =====
+function copyMarkdown() {
+  if (!currentMarkdown) return;
+  navigator.clipboard.writeText(currentMarkdown).then(() => {
+    showToast('✅ 已複製 Markdown 到剪貼簿', 'success');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = currentMarkdown;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ 已複製', 'success');
+  });
+}
+
+function openEmailModal() {
+  const email = document.getElementById('f-email').value.trim();
+  document.getElementById('modal-email').value = email;
+  document.getElementById('email-modal').classList.add('show');
+}
+
+function closeEmailModal() {
+  document.getElementById('email-modal').classList.remove('show');
+}
+
+function sendEmail() {
+  const email = document.getElementById('modal-email').value.trim();
+  if (!email || !email.includes('@')) {
+    showToast('請輸入有效的 Email 地址', 'error');
+    return;
+  }
+
+  if (!currentGameSetId) {
+    showToast('找不到遊戲記錄', 'error');
+    return;
+  }
+
+  showToast('📧 正在發送...', '');
+
+  const url = API_URL + '?action=sendGameEmail&gameSetId=' + encodeURIComponent(currentGameSetId) + '&email=' + encodeURIComponent(email);
+  fetch(url)
+    .then(r => r.json())
+    .then(result => {
+      if (result.success) {
+        showToast('✅ 已發送到 ' + email, 'success');
+        closeEmailModal();
+      } else {
+        showToast('發送失敗：' + result.error, 'error');
+      }
+    })
+    .catch(err => {
+      showToast('網絡錯誤：' + err.message, 'error');
+    });
+}
+
+// ===== History =====
+function loadHistory() {
+  const listEl = document.getElementById('history-list');
+  listEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div><div class="loading-text">載入中...</div></div>';
+
+  const url = API_URL + '?action=listGameSets';
+  fetch(url)
+    .then(r => r.json())
+    .then(result => {
+      if (result.success && result.gameSets && result.gameSets.length > 0) {
+        listEl.innerHTML = result.gameSets.map(g => `
+          <div class="history-card" onclick="loadGameSet('${g.id}')">
+            <div class="info">
+              <h4>${g.name || '團建遊戲'}</h4>
+              <p>${g.gameCount || '?'} 個遊戲 · ${g.venue || ''} ${g.purposes ? '· ' + g.purposes : ''}</p>
+            </div>
+            <div class="meta">
+              ${g.createdAt ? new Date(g.createdAt).toLocaleDateString() : ''}
+            </div>
+          </div>
+        `).join('');
+      } else {
+        listEl.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:30px;">還沒有任何歷史記錄</p>';
+      }
+    })
+    .catch(err => {
+      listEl.innerHTML = '<p style="text-align:center;color:var(--danger);padding:30px;">載入失敗：' + err.message + '</p>';
+    });
+}
+
+function loadGameSet(gameSetId) {
+  showToast('載入中...', '');
+
+  const url = API_URL + '?action=getGameSet&gameSetId=' + encodeURIComponent(gameSetId);
+  fetch(url)
+    .then(r => r.json())
+    .then(result => {
+      if (result.success && result.gameSet.markdownContent) {
+        currentGameSetId = result.gameSet.id;
+        currentMarkdown = result.gameSet.markdownContent;
+
+        // Switch to create view and show result
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-create').classList.add('active');
+        showResult(result.gameSet.markdownContent);
+      } else {
+        showToast('載入失敗', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('網絡錯誤：' + err.message, 'error');
+    });
+}
+
+// ===== Reset =====
+function resetForm() {
+  // Show step progress again
+  document.getElementById('step-progress').style.display = 'flex';
+
+  // Reset to step 1
+  goToStep(1);
+
+  // Clear selections (keep defaults)
+  currentGameSetId = null;
+  currentMarkdown = '';
+}
+
+// ===== Toast =====
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.className = 'toast show' + (type ? ' ' + type : '');
+  setTimeout(() => { toast.className = 'toast'; }, 3500);
+}
+</script>
+
+</body>
+</html>
