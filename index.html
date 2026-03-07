@@ -37,52 +37,63 @@
     
     .app-header {
       text-align: center;
-      margin-bottom: 35px;
-      padding-bottom: 25px;
-      border-bottom: 2px solid var(--beige);
+      margin-bottom: 30px;
+      padding: 25px 20px;
+      background: linear-gradient(135deg, var(--brown) 0%, var(--brown-light) 100%);
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(139, 125, 107, 0.2);
     }
     
     .app-title {
-      font-size: 2.2em;
-      color: var(--brown);
+      font-size: 2em;
+      color: white;
       margin-bottom: 8px;
-      font-weight: 600;
+      font-weight: 700;
       letter-spacing: 1px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .app-subtitle {
-      color: var(--text-light);
-      font-size: 1em;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.95em;
+      margin-bottom: 15px;
+      font-weight: 500;
     }
     
     .lang-selector {
       display: flex;
       justify-content: center;
-      gap: 8px;
-      margin-top: 20px;
+      gap: 6px;
+      margin-top: 15px;
+      padding: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
     }
     
     .lang-btn {
-      padding: 8px 20px;
-      border: 2px solid var(--brown-light);
-      background: white;
-      color: var(--brown);
+      padding: 8px 18px;
+      border: 2px solid transparent;
+      background: transparent;
+      color: rgba(255,255,255,0.75);
       cursor: pointer;
-      border-radius: 25px;
-      font-size: 0.9em;
-      font-weight: 600;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: 700;
       transition: all 0.3s;
+      letter-spacing: 0.5px;
     }
     
     .lang-btn:hover {
-      background: var(--beige);
-      border-color: var(--brown);
+      background: rgba(255,255,255,0.15);
+      color: white;
     }
     
     .lang-btn.active {
-      background: var(--brown);
-      color: white;
-      border-color: var(--brown);
+      background: white;
+      color: var(--brown);
+      border-color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     
     .view { display: none; }
@@ -217,13 +228,168 @@
       margin-top: 6px;
     }
     
-    .checkbox-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 12px;
+    .section-divider {
+      height: 2px;
+      background: linear-gradient(90deg, var(--beige), transparent);
+      margin: 30px 0 20px;
     }
     
+    .collapsible-section {
+      margin-bottom: 15px;
+      border: 2px solid var(--beige);
+      border-radius: 15px;
+      overflow: hidden;
+      background: white;
+    }
+    
+    .collapsible-header {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      background: var(--cream);
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1em;
+      font-weight: 600;
+      color: var(--brown);
+      transition: all 0.3s;
+    }
+    
+    .collapsible-header:hover {
+      background: var(--beige);
+    }
+    
+    .collapsible-icon {
+      font-size: 0.8em;
+      transition: transform 0.3s;
+      color: var(--teal);
+    }
+    
+    .collapsible-section.open .collapsible-icon {
+      transform: rotate(90deg);
+    }
+    
+    .collapsible-title {
+      flex: 1;
+      text-align: left;
+    }
+    
+    .collapsible-count {
+      font-size: 0.85em;
+      color: var(--text-light);
+      background: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-weight: 500;
+    }
+    
+    .collapsible-content {
+      display: none;
+      padding: 20px;
+      background: white;
+    }
+    
+    .collapsible-section.open .collapsible-content {
+      display: block;
+    }
+    
+    .checkbox-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    
+    .checkbox-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      background: var(--cream);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      position: relative;
+    }
+    
+    .checkbox-chip:hover {
+      background: var(--beige);
+      transform: translateY(-2px);
+    }
+    
+    .checkbox-chip.selected {
+      background: var(--teal);
+      color: white;
+      border-color: var(--teal-dark);
+      box-shadow: 0 4px 12px rgba(91, 197, 212, 0.3);
+    }
+    
+    .checkbox-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .checkbox-chip .checkbox-icon {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--brown-light);
+      border-radius: 6px;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+      flex-shrink: 0;
+    }
+    
+    .checkbox-chip.selected .checkbox-icon {
+      background: white;
+      border-color: white;
+    }
+    
+    .checkbox-chip .checkbox-icon::after {
+      content: '✓';
+      color: var(--teal);
+      font-weight: bold;
+      font-size: 14px;
+      opacity: 0;
+      transform: scale(0);
+      transition: all 0.2s;
+    }
+    
+    .checkbox-chip.selected .checkbox-icon::after {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    .checkbox-chip .chip-label {
+      flex: 1;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+    
+    .checkbox-chip .chip-desc {
+      font-size: 0.75em;
+      opacity: 0.8;
+      margin-top: 3px;
+      line-height: 1.3;
+    }
+    
+    .checkbox-chip.selected .chip-desc {
+      opacity: 0.9;
+    }
+    
+    .checkbox-chip .chip-count {
+      font-size: 0.8em;
+      opacity: 0.7;
+      font-weight: 500;
+    }
+    
+    /* Legacy support for old checkbox-item */
     .checkbox-item {
       display: flex;
       align-items: center;
@@ -715,13 +881,34 @@
     }
     
     @media (max-width: 768px) {
-      .app-title { font-size: 1.8em; }
+      .app-title { font-size: 1.6em; }
       .question-text { font-size: 1.3em; }
-      .stats { grid-template-columns: 1fr; gap: 15px; }
+      .stats { grid-template-columns: 1fr; gap: 12px; }
       .nav-tabs { flex-wrap: wrap; }
       .nav-tab { padding: 12px 8px; font-size: 0.85em; }
       .btn { padding: 12px 20px; font-size: 0.95em; }
       .card { padding: 20px; }
+      .checkbox-grid { grid-template-columns: 1fr; }
+      .lang-selector {
+        flex-direction: row;
+        gap: 4px;
+      }
+      .lang-btn {
+        padding: 6px 14px;
+        font-size: 0.8em;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .container { padding: 15px 12px; }
+      .app-header { padding: 20px 15px; margin-bottom: 20px; }
+      .app-title { font-size: 1.4em; }
+      .app-subtitle { font-size: 0.85em; }
+      .card { padding: 18px; }
+      .question-card { padding: 30px 20px; min-height: 180px; }
+      .question-text { font-size: 1.2em; }
+      .btn-group { flex-direction: column; }
+      .btn { width: 100%; }
     }
   </style>
 </head>
@@ -772,6 +959,7 @@
     </div>
     
     <form id="form-create-profile">
+      <!-- Basic Info -->
       <div class="form-group">
         <label data-i18n="profileName">卡組名稱 *</label>
         <input type="text" id="profile-name" required data-i18n-placeholder="profileNamePlaceholder">
@@ -787,52 +975,92 @@
         <textarea id="profile-description" data-i18n-placeholder="profileDescPlaceholder"></textarea>
       </div>
       
-      <h3 style="color: var(--brown); margin: 25px 0 15px;">📋 <span data-i18n="selectGeneral">選擇通用問題</span></h3>
-      <p class="form-group hint" data-i18n="selectGeneralHint">從問題庫中選擇適合的分類</p>
-      <div id="general-categories" class="checkbox-group">
-        <div class="loading">
-          <div class="loading-spinner"></div>
-          <p data-i18n="loadingCategories">載入分類中...</p>
+      <!-- Question Types Section -->
+      <div class="section-divider"></div>
+      
+      <h3 style="color: var(--brown); margin: 25px 0 12px; font-size: 1.1em;">
+        🧠 <span data-i18n="questionTypes">問題類型</span>
+      </h3>
+      <p class="hint" style="margin-bottom: 18px;" data-i18n="questionTypesHint">
+        基於心理學研究，選擇適合的問題類型以促進深度交流
+      </p>
+      
+      <!-- General Questions from Library -->
+      <div class="collapsible-section">
+        <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
+          <span class="collapsible-icon">▶</span>
+          <span class="collapsible-title">
+            📚 <span data-i18n="libraryQuestions">問題庫分類</span>
+          </span>
+          <span class="collapsible-count" id="library-count">0 selected</span>
+        </button>
+        <div class="collapsible-content">
+          <div id="general-categories" class="checkbox-grid">
+            <div class="loading">
+              <div class="loading-spinner"></div>
+              <p data-i18n="loadingCategories">載入分類中...</p>
+            </div>
+          </div>
         </div>
       </div>
       
-      <h3 style="color: var(--brown); margin: 25px 0 15px;">🤖 <span data-i18n="aiGenerate">AI 生成問題（選填）</span></h3>
-      <div class="form-group">
-        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-          <input type="checkbox" id="enable-ai" onchange="toggleAISection()" style="width: auto;">
-          <span data-i18n="enableAI">啟用 AI 生成</span>
-        </label>
-      </div>
-      
-      <div id="ai-section" style="display: none;">
-        <div class="form-group">
-          <label data-i18n="aiGroupType">小組類型</label>
-          <input type="text" id="ai-group-type" data-i18n-placeholder="aiGroupTypePlaceholder">
-        </div>
-        
-        <div class="form-group">
-          <label data-i18n="aiAudience">參與者背景</label>
-          <input type="text" id="ai-audience" data-i18n-placeholder="aiAudiencePlaceholder">
-        </div>
-        
-        <div class="form-group">
-          <label data-i18n="aiTheme">主題/目的</label>
-          <input type="text" id="ai-theme" data-i18n-placeholder="aiThemePlaceholder">
-        </div>
-        
-        <div class="form-group">
-          <label data-i18n="aiCategories">自訂分類（選填）</label>
-          <input type="text" id="ai-categories" data-i18n-placeholder="aiCategoriesPlaceholder">
-          <div class="hint" data-i18n="aiCategoriesHint">用逗號分隔多個分類</div>
-        </div>
-        
-        <div class="form-group">
-          <label data-i18n="aiCount">生成數量</label>
-          <input type="number" id="ai-count" value="20" min="5" max="50">
+      <!-- Research-Based Question Types -->
+      <div class="collapsible-section">
+        <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
+          <span class="collapsible-icon">▶</span>
+          <span class="collapsible-title">
+            🔬 <span data-i18n="researchTypes">心理學研究型問題</span>
+          </span>
+          <span class="collapsible-count" id="research-count">0 selected</span>
+        </button>
+        <div class="collapsible-content">
+          <p class="hint" style="margin-bottom: 15px;" data-i18n="researchHint">
+            選擇 AI 將生成該類型的深度問題
+          </p>
+          <div class="checkbox-grid" id="research-types">
+            <!-- These will be populated by JS -->
+          </div>
         </div>
       </div>
       
-      <div class="btn-group">
+      <!-- AI Custom Generation -->
+      <div class="collapsible-section">
+        <button type="button" class="collapsible-header" onclick="toggleCollapsible(this)">
+          <span class="collapsible-icon">▶</span>
+          <span class="collapsible-title">
+            ✨ <span data-i18n="customGeneration">自訂生成</span>
+          </span>
+        </button>
+        <div class="collapsible-content">
+          <div class="form-group">
+            <label data-i18n="aiGroupType">小組類型</label>
+            <input type="text" id="ai-group-type" data-i18n-placeholder="aiGroupTypePlaceholder">
+          </div>
+          
+          <div class="form-group">
+            <label data-i18n="aiAudience">參與者背景</label>
+            <input type="text" id="ai-audience" data-i18n-placeholder="aiAudiencePlaceholder">
+          </div>
+          
+          <div class="form-group">
+            <label data-i18n="aiTheme">主題/目的</label>
+            <input type="text" id="ai-theme" data-i18n-placeholder="aiThemePlaceholder">
+          </div>
+          
+          <div class="form-group">
+            <label data-i18n="aiCategories">自訂分類（選填）</label>
+            <input type="text" id="ai-categories" data-i18n-placeholder="aiCategoriesPlaceholder">
+            <div class="hint" data-i18n="aiCategoriesHint">用逗號分隔多個分類</div>
+          </div>
+          
+          <div class="form-group">
+            <label data-i18n="aiCount">生成數量</label>
+            <input type="number" id="ai-count" value="20" min="5" max="50">
+          </div>
+        </div>
+      </div>
+      
+      <div class="btn-group" style="margin-top: 30px;">
         <button type="button" class="btn btn-outline-teal" onclick="showView('select-profile')">
           <span data-i18n="cancel">取消</span>
         </button>
@@ -1032,6 +1260,182 @@
 <script>
 // ===== 感匯 Feel Interlink - Multilingual Card Game =====
 
+// Research-Based Question Types (from psychological studies)
+const RESEARCH_QUESTION_TYPES = {
+  tc: [
+    {
+      id: 'graduated_intimacy',
+      name: '漸進式親密問題',
+      desc: '基於心理學家 Arthur Aron 的 36 個問題研究',
+      source: 'Aron et al. (1997)',
+      count: 12
+    },
+    {
+      id: 'values_clarification',
+      name: '價值觀探索',
+      desc: '了解核心價值與人生優先次序',
+      source: 'Acceptance & Commitment Therapy',
+      count: 10
+    },
+    {
+      id: 'life_story',
+      name: '生命故事',
+      desc: '敘事治療取向，探索個人經歷與成長',
+      source: 'Narrative Therapy (White & Epston)',
+      count: 10
+    },
+    {
+      id: 'strengths_based',
+      name: '優勢與性格強項',
+      desc: '正向心理學取向，發掘個人優勢',
+      source: 'VIA Character Strengths (Peterson & Seligman)',
+      count: 8
+    },
+    {
+      id: 'future_visioning',
+      name: '未來願景',
+      desc: '探索夢想、目標與期待',
+      source: 'Solution-Focused Brief Therapy',
+      count: 8
+    },
+    {
+      id: 'communication_style',
+      name: '溝通偏好',
+      desc: '了解溝通模式與互動風格',
+      source: 'Interpersonal Communication Theory',
+      count: 8
+    },
+    {
+      id: 'attachment_connection',
+      name: '依附與連結',
+      desc: '探索關係模式與情感連結',
+      source: 'Attachment Theory (Bowlby)',
+      count: 10
+    },
+    {
+      id: 'gratitude_appreciation',
+      name: '感恩與欣賞',
+      desc: '培養感恩心態與人際欣賞',
+      source: 'Positive Psychology (Seligman)',
+      count: 8
+    },
+    {
+      id: 'growth_challenges',
+      name: '成長與挑戰',
+      desc: '從困難中學習與成長的經驗',
+      source: 'Post-Traumatic Growth Theory',
+      count: 10
+    },
+    {
+      id: 'conflict_resolution',
+      name: '衝突與解決',
+      desc: '處理分歧與衝突的方式',
+      source: 'Thomas-Kilmann Conflict Model',
+      count: 8
+    },
+    {
+      id: 'identity_belonging',
+      name: '身份認同與歸屬',
+      desc: '探索自我認同與群體歸屬感',
+      source: 'Social Identity Theory (Tajfel)',
+      count: 8
+    },
+    {
+      id: 'meaning_purpose',
+      name: '意義與目的',
+      desc: '探索生命意義與人生目的',
+      source: 'Logotherapy (Frankl)',
+      count: 10
+    }
+  ],
+  en: [
+    {
+      id: 'graduated_intimacy',
+      name: 'Graduated Intimacy',
+      desc: 'Based on Arthur Aron\'s 36 Questions research',
+      source: 'Aron et al. (1997)',
+      count: 12
+    },
+    {
+      id: 'values_clarification',
+      name: 'Values Clarification',
+      desc: 'Explore core values and life priorities',
+      source: 'Acceptance & Commitment Therapy',
+      count: 10
+    },
+    {
+      id: 'life_story',
+      name: 'Life Story',
+      desc: 'Narrative therapy approach to personal experiences',
+      source: 'Narrative Therapy (White & Epston)',
+      count: 10
+    },
+    {
+      id: 'strengths_based',
+      name: 'Character Strengths',
+      desc: 'Positive psychology approach to discover strengths',
+      source: 'VIA Character Strengths (Peterson & Seligman)',
+      count: 8
+    },
+    {
+      id: 'future_visioning',
+      name: 'Future Visioning',
+      desc: 'Explore dreams, goals, and aspirations',
+      source: 'Solution-Focused Brief Therapy',
+      count: 8
+    },
+    {
+      id: 'communication_style',
+      name: 'Communication Preferences',
+      desc: 'Understand communication patterns and styles',
+      source: 'Interpersonal Communication Theory',
+      count: 8
+    },
+    {
+      id: 'attachment_connection',
+      name: 'Attachment & Connection',
+      desc: 'Explore relationship patterns and emotional bonds',
+      source: 'Attachment Theory (Bowlby)',
+      count: 10
+    },
+    {
+      id: 'gratitude_appreciation',
+      name: 'Gratitude & Appreciation',
+      desc: 'Cultivate gratitude and interpersonal appreciation',
+      source: 'Positive Psychology (Seligman)',
+      count: 8
+    },
+    {
+      id: 'growth_challenges',
+      name: 'Growth & Challenges',
+      desc: 'Learning and growth from difficulties',
+      source: 'Post-Traumatic Growth Theory',
+      count: 10
+    },
+    {
+      id: 'conflict_resolution',
+      name: 'Conflict Resolution',
+      desc: 'Approaches to handling disagreements',
+      source: 'Thomas-Kilmann Conflict Model',
+      count: 8
+    },
+    {
+      id: 'identity_belonging',
+      name: 'Identity & Belonging',
+      desc: 'Explore self-identity and sense of belonging',
+      source: 'Social Identity Theory (Tajfel)',
+      count: 8
+    },
+    {
+      id: 'meaning_purpose',
+      name: 'Meaning & Purpose',
+      desc: 'Explore life meaning and purpose',
+      source: 'Logotherapy (Frankl)',
+      count: 10
+    }
+  ]
+};
+
 // Translations
 const translations = {
   tc: {
@@ -1116,7 +1520,14 @@ const translations = {
     createFailed: "創建失敗",
     allDrawn: "已抽完所有問題！🎉",
     confirmClear: "確定要清除記錄嗎？",
-    confirmReset: "確定要重新開始嗎？"
+    confirmReset: "確定要重新開始嗎？",
+    questionTypes: "問題類型",
+    questionTypesHint: "基於心理學研究，選擇適合的問題類型以促進深度交流",
+    libraryQuestions: "問題庫分類",
+    researchTypes: "心理學研究型問題",
+    researchHint: "選擇 AI 將生成該類型的深度問題",
+    customGeneration: "自訂生成",
+    selected: "已選"
   },
   en: {
     appTitle: "Feel Interlink",
@@ -1200,7 +1611,14 @@ const translations = {
     createFailed: "Creation failed",
     allDrawn: "All questions drawn! 🎉",
     confirmClear: "Are you sure you want to clear history?",
-    confirmReset: "Are you sure you want to restart?"
+    confirmReset: "Are you sure you want to restart?",
+    questionTypes: "Question Types",
+    questionTypesHint: "Based on psychological research, select question types for deeper connection",
+    libraryQuestions: "Question Library Categories",
+    researchTypes: "Research-Based Question Types",
+    researchHint: "Select types for AI to generate deep questions",
+    customGeneration: "Custom Generation",
+    selected: "selected"
   }
 };
 
@@ -1282,7 +1700,51 @@ function showView(viewId) {
   
   if (viewId === 'create-profile') {
     loadGeneralCategories();
+    populateResearchTypes();
   }
+}
+
+// Collapsible sections
+function toggleCollapsible(button) {
+  const section = button.closest('.collapsible-section');
+  section.classList.toggle('open');
+}
+
+// Populate research-based question types
+function populateResearchTypes() {
+  const container = document.getElementById('research-types');
+  const lang = currentLang === 'en' ? 'en' : 'tc';
+  const types = RESEARCH_QUESTION_TYPES[lang];
+  
+  container.innerHTML = types.map(type => `
+    <label class="checkbox-chip" data-type-id="${type.id}">
+      <input type="checkbox" name="research-type" value="${type.id}">
+      <div class="checkbox-icon"></div>
+      <div style="flex: 1;">
+        <div class="chip-label">${type.name}</div>
+        <div class="chip-desc">${type.desc}</div>
+      </div>
+    </label>
+  `).join('');
+  
+  // Add click handlers
+  container.querySelectorAll('.checkbox-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+      this.classList.toggle('selected');
+      const checkbox = this.querySelector('input[type="checkbox"]');
+      checkbox.checked = this.classList.contains('selected');
+      updateCounts();
+    });
+  });
+}
+
+// Update selection counts
+function updateCounts() {
+  const libraryCount = document.querySelectorAll('#general-categories .checkbox-chip.selected').length;
+  const researchCount = document.querySelectorAll('#research-types .checkbox-chip.selected').length;
+  
+  document.getElementById('library-count').textContent = `${libraryCount} ${t('selected')}`;
+  document.getElementById('research-count').textContent = `${researchCount} ${t('selected')}`;
 }
 
 // API calls
@@ -1346,23 +1808,31 @@ async function loadGeneralCategories() {
   const container = document.getElementById('general-categories');
   
   if (!result.success || !result.categories) {
-    container.innerHTML = '<p style="color: var(--text-light);">無法載入分類</p>';
+    container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">無法載入分類</p>';
     return;
   }
   
   container.innerHTML = result.categories.map(cat => `
-    <label class="checkbox-item">
+    <label class="checkbox-chip">
       <input type="checkbox" name="general-cat" value="${cat.name}">
-      <span>${cat.name} (${cat.count}${t('questions')})</span>
+      <div class="checkbox-icon"></div>
+      <div style="flex: 1;">
+        <div class="chip-label">${cat.name}</div>
+      </div>
+      <div class="chip-count">${cat.count}</div>
     </label>
   `).join('');
   
-  container.querySelectorAll('.checkbox-item').forEach(item => {
-    item.addEventListener('click', function() {
+  container.querySelectorAll('.checkbox-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
       this.classList.toggle('selected');
-      this.querySelector('input').checked = this.classList.contains('selected');
+      const checkbox = this.querySelector('input[type="checkbox"]');
+      checkbox.checked = this.classList.contains('selected');
+      updateCounts();
     });
   });
+  
+  updateCounts();
 }
 
 document.getElementById('form-create-profile').addEventListener('submit', async (e) => {
@@ -1375,22 +1845,35 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   const selectedCategories = Array.from(document.querySelectorAll('input[name="general-cat"]:checked'))
     .map(cb => cb.value);
   
+  const selectedResearchTypes = Array.from(document.querySelectorAll('input[name="research-type"]:checked'))
+    .map(cb => cb.value);
+  
+  // Check if any AI generation is requested
+  const hasCustomAI = document.getElementById('ai-group-type').value.trim() || 
+                      document.getElementById('ai-audience').value.trim() ||
+                      document.getElementById('ai-theme').value.trim() ||
+                      document.getElementById('ai-categories').value.trim();
+  
+  const generateAI = selectedResearchTypes.length > 0 || hasCustomAI;
+  
   const data = {
     name: document.getElementById('profile-name').value,
     type: document.getElementById('profile-type').value,
     description: document.getElementById('profile-description').value,
     includeGeneralCategories: selectedCategories,
-    generateAI: document.getElementById('enable-ai').checked
+    generateAI: generateAI,
+    researchTypes: selectedResearchTypes  // New field
   };
   
-  if (data.generateAI) {
+  if (generateAI) {
     data.aiSettings = {
       language: '繁體中文',
       groupType: document.getElementById('ai-group-type').value,
       audience: document.getElementById('ai-audience').value,
       theme: document.getElementById('ai-theme').value,
       categories: document.getElementById('ai-categories').value,
-      questionCount: parseInt(document.getElementById('ai-count').value)
+      questionCount: parseInt(document.getElementById('ai-count').value),
+      researchTypes: selectedResearchTypes  // Pass research types to AI
     };
   }
   
@@ -1408,12 +1891,7 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   }
 });
 
-function toggleAISection() {
-  document.getElementById('ai-section').style.display = 
-    document.getElementById('enable-ai').checked ? 'block' : 'none';
-}
-
-// Game logic
+// Populate categories
 function initGame() {
   populateCategories();
   populateEmotions();
