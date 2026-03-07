@@ -40,37 +40,40 @@
     /* ===== Top Nav (replaces header, no sticky for Wix embed) ===== */
     .top-nav {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: space-between;
-      padding: 14px 20px;
+      padding: 14px 20px 10px;
       background: var(--primary-dark);
       border-bottom: 3px solid var(--accent);
+      text-align: center;
     }
     .top-nav-brand {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       color: white;
+      margin-bottom: 10px;
     }
     .brand-icon { font-size: 1.5em; }
     .brand-name {
-      font-size: 1.15em;
+      font-size: 1.25em;
       font-weight: 800;
       letter-spacing: -0.3px;
     }
     .brand-sub {
       font-weight: 400;
-      font-size: 0.85em;
+      font-size: 0.82em;
       opacity: 0.75;
       margin-left: 6px;
     }
-    .top-nav-links { display: flex; gap: 6px; }
+    .top-nav-links { display: flex; gap: 6px; justify-content: center; }
     .nav-link {
       color: rgba(255,255,255,0.75);
       text-decoration: none;
       font-size: 0.85em;
       font-weight: 700;
-      padding: 6px 12px;
+      padding: 6px 14px;
       border-radius: 20px;
       transition: all 0.2s;
     }
@@ -172,10 +175,11 @@
       background: var(--primary-light);
     }
     .step-label {
-      font-size: 0.72em;
+      font-size: 0.7em;
       font-weight: 700;
       color: var(--text-muted);
       text-align: center;
+      line-height: 1.3;
     }
     .step-item.active .step-label { color: var(--primary); }
 
@@ -288,6 +292,7 @@
     .chip {
       display: flex;
       align-items: center;
+      line-height: 1.3;
       gap: 7px;
       padding: 7px 13px;
       background: var(--chip-bg);
@@ -519,23 +524,23 @@
     <div class="step-progress" id="step-progress">
       <div class="step-item active" data-step="1" onclick="goToStep(1)">
         <div class="step-circle">1</div>
-        <div class="step-label">參加者</div>
+        <div class="step-label">參加者<br><span style="font-size:0.75em;opacity:0.8">People</span></div>
       </div>
       <div class="step-item" data-step="2" onclick="goToStep(2)">
         <div class="step-circle">2</div>
-        <div class="step-label">活動設定</div>
+        <div class="step-label">活動設定<br><span style="font-size:0.75em;opacity:0.8">Settings</span></div>
       </div>
       <div class="step-item" data-step="3" onclick="goToStep(3)">
         <div class="step-circle">3</div>
-        <div class="step-label">特別要求</div>
+        <div class="step-label">特別要求<br><span style="font-size:0.75em;opacity:0.8">Rules</span></div>
       </div>
       <div class="step-item" data-step="4" onclick="goToStep(4)">
         <div class="step-circle">4</div>
-        <div class="step-label">目的</div>
+        <div class="step-label">目的<br><span style="font-size:0.75em;opacity:0.8">Purpose</span></div>
       </div>
       <div class="step-item" data-step="5" onclick="goToStep(5)">
         <div class="step-circle">5</div>
-        <div class="step-label">確認</div>
+        <div class="step-label">確認<br><span style="font-size:0.75em;opacity:0.8">Confirm</span></div>
       </div>
     </div>
 
@@ -558,20 +563,20 @@
         <div class="form-group">
           <label>參加者關係 Relationship</label>
           <div class="radio-group" id="rg-relationship">
-            <div class="radio-chip" data-value="夫婦" onclick="selectRadio(this)">💑 夫婦</div>
-            <div class="radio-chip" data-value="朋友" onclick="selectRadio(this)">🤝 朋友</div>
-            <div class="radio-chip" data-value="同事" onclick="selectRadio(this)">💼 同事</div>
-            <div class="radio-chip" data-value="教會弟兄姊妹" onclick="selectRadio(this)">⛪ 教會弟兄姊妹</div>
-            <div class="radio-chip" data-value="混合" onclick="selectRadio(this)">🌈 混合</div>
+            <div class="radio-chip" data-value="夫婦" onclick="selectRadio(this)">💑 夫婦 Couples</div>
+            <div class="radio-chip" data-value="朋友" onclick="selectRadio(this)">🤝 朋友 Friends</div>
+            <div class="radio-chip" data-value="同事" onclick="selectRadio(this)">💼 同事 Colleagues</div>
+            <div class="radio-chip" data-value="教會弟兄姊妹" onclick="selectRadio(this)">⛪ 教會 Church</div>
+            <div class="radio-chip" data-value="混合" onclick="selectRadio(this)">🌈 混合 Mixed</div>
           </div>
         </div>
 
         <div class="form-group">
           <label>熟悉程度 Familiarity</label>
           <div class="radio-group" id="rg-familiarity">
-            <div class="radio-chip" data-value="初次見面" onclick="selectRadio(this)">👋 初次見面</div>
-            <div class="radio-chip" data-value="認識但不熟" onclick="selectRadio(this)">🙂 認識但不熟</div>
-            <div class="radio-chip" data-value="熟悉" onclick="selectRadio(this)">😄 熟悉</div>
+            <div class="radio-chip" data-value="初次見面" onclick="selectRadio(this)">👋 初次見面 First meet</div>
+            <div class="radio-chip" data-value="認識但不熟" onclick="selectRadio(this)">🙂 認識但不熟 Acquaintances</div>
+            <div class="radio-chip" data-value="熟悉" onclick="selectRadio(this)">😄 熟悉 Close friends</div>
           </div>
         </div>
 
@@ -579,11 +584,11 @@
           <label>是否包括兒童？ Include Children?</label>
           <div class="toggle-row">
             <div class="toggle" id="toggle-children" onclick="toggleChildren()"></div>
-            <span class="toggle-label" id="toggle-children-label">不包括兒童</span>
+            <span class="toggle-label" id="toggle-children-label">不包括兒童 No children</span>
           </div>
           <div class="conditional" id="children-section">
             <div class="form-group">
-              <label>兒童年齡範圍</label>
+              <label>兒童年齡範圍 Children's Age Range</label>
               <input type="text" id="f-childrenAgeRange" placeholder="例如：7-16">
             </div>
           </div>
@@ -591,7 +596,7 @@
 
         <div class="step-nav">
           <div></div>
-          <button class="btn btn-primary" onclick="goToStep(2)">下一步 →</button>
+          <button class="btn btn-primary" onclick="goToStep(2)">下一步 Next →</button>
         </div>
       </div>
     </div>
@@ -640,8 +645,8 @@
         </div>
 
         <div class="step-nav">
-          <button class="btn btn-outline" onclick="goToStep(1)">← 上一步</button>
-          <button class="btn btn-primary" onclick="goToStep(3)">下一步 →</button>
+          <button class="btn btn-outline" onclick="goToStep(1)">← 上一步 Back</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">下一步 Next →</button>
         </div>
       </div>
     </div>
@@ -656,48 +661,48 @@
           <div class="chip-group" id="cg-restrictions">
             <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免男女身體接觸">
-              🚫 避免男女身體接觸
+              🚫 避免男女身體接觸<br><span style="font-size:0.8em;opacity:0.75">No cross-gender contact</span>
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="盡量不用道具（如需要只用日常物品）">
-              📦 盡量不用道具
+              📦 盡量不用道具<br><span style="font-size:0.8em;opacity:0.75">Minimal props</span>
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免劇烈運動">
-              🏃 避免劇烈運動
+              🏃 避免劇烈運動<br><span style="font-size:0.8em;opacity:0.75">No intense exercise</span>
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="適合行動不便者參與">
-              ♿ 適合行動不便者
+              ♿ 適合行動不便者<br><span style="font-size:0.8em;opacity:0.75">Mobility friendly</span>
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免需要閱讀或書寫的遊戲">
-              ✏️ 避免閱讀/書寫
+              ✏️ 避免閱讀/書寫<br><span style="font-size:0.8em;opacity:0.75">No reading/writing</span>
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
               <input type="checkbox" value="避免尷尬或太私密的互動">
-              😳 避免尷尬互動
+              😳 避免尷尬互動<br><span style="font-size:0.8em;opacity:0.75">No awkward moments</span>
             </label>
           </div>
         </div>
 
         <div class="form-group">
-          <label>其他特別要求（自由輸入）</label>
-          <textarea id="f-otherRequirements" placeholder="例如：有一位輪椅使用者、場地比較小..."></textarea>
+          <label>其他特別要求 Other Requirements（自由輸入 Free text）</label>
+          <textarea id="f-otherRequirements" placeholder="例如：有一位輪椅使用者、場地比較小... / e.g. one wheelchair user, small venue..."></textarea>
         </div>
 
         <div class="form-group">
           <label>分組要求 Grouping Rule</label>
           <div class="radio-group" id="rg-grouping">
-            <div class="radio-chip" data-value="打散夫婦/家庭分開" onclick="selectRadio(this)">🔀 打散夫婦/家庭</div>
-            <div class="radio-chip" data-value="自由分組" onclick="selectRadio(this)">🎲 自由分組</div>
-            <div class="radio-chip" data-value="不分組" onclick="selectRadio(this)">👤 不分組</div>
+            <div class="radio-chip" data-value="打散夫婦/家庭分開" onclick="selectRadio(this)">🔀 打散夫婦/家庭 Split couples</div>
+            <div class="radio-chip" data-value="自由分組" onclick="selectRadio(this)">🎲 自由分組 Free groups</div>
+            <div class="radio-chip" data-value="不分組" onclick="selectRadio(this)">👤 不分組 No groups</div>
           </div>
         </div>
 
         <div class="step-nav">
-          <button class="btn btn-outline" onclick="goToStep(2)">← 上一步</button>
-          <button class="btn btn-primary" onclick="goToStep(4)">下一步 →</button>
+          <button class="btn btn-outline" onclick="goToStep(2)">← 上一步 Back</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">下一步 Next →</button>
         </div>
       </div>
     </div>
@@ -708,25 +713,25 @@
         <h2>🎯 活動目的 Purpose</h2>
 
         <div class="form-group">
-          <label>活動目的（可多選）</label>
+          <label>活動目的 Purpose（可多選 Multi-select）</label>
           <div class="chip-group" id="cg-purposes">
             <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="破冰認識"> 🧊 破冰認識
+              <input type="checkbox" value="破冰認識"> 🧊 破冰認識 Icebreaker
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="增進感情"> 💕 增進感情
+              <input type="checkbox" value="增進感情"> 💕 增進感情 Bonding
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="信仰反思"> ✝️ 信仰反思
+              <input type="checkbox" value="信仰反思"> ✝️ 信仰反思 Faith reflection
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="團隊合作"> 🤝 團隊合作
+              <input type="checkbox" value="團隊合作"> 🤝 團隊合作 Teamwork
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="純粹好玩"> 🎉 純粹好玩
+              <input type="checkbox" value="純粹好玩"> 🎉 純粹好玩 Just for fun
             </label>
             <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="價值觀探索"> 💡 價值觀探索
+              <input type="checkbox" value="價值觀探索"> 💡 價值觀探索 Values exploration
             </label>
           </div>
         </div>
@@ -735,24 +740,24 @@
           <label>每個遊戲附帶反思分享問題？ Include Debrief?</label>
           <div class="toggle-row">
             <div class="toggle on" id="toggle-debrief" onclick="toggleDebrief()"></div>
-            <span class="toggle-label" id="toggle-debrief-label">包含反思問題（含聖經經文）</span>
+            <span class="toggle-label" id="toggle-debrief-label">包含反思問題 Include debrief（含聖經經文 with Bible verses）</span>
           </div>
         </div>
 
         <div class="form-group">
           <label>其他補充說明 Additional Notes</label>
-          <textarea id="f-additionalNotes" placeholder="例如：是退修會的其中一環、想讓大家更多認識彼此..."></textarea>
+          <textarea id="f-additionalNotes" placeholder="例如：是退修會的其中一環 / e.g. part of a retreat, want everyone to know each other better..."></textarea>
         </div>
 
         <div class="form-group">
-          <label>📧 完成後寄送到 Email（選填）</label>
+          <label>📧 完成後寄送到 Email（選填 Optional）</label>
           <input type="email" id="f-email" placeholder="your@email.com">
-          <div class="hint">生成完成後會自動發送遊戲手冊到此信箱</div>
+          <div class="hint">生成完成後會自動發送遊戲手冊到此信箱 · Game booklet will be emailed upon completion</div>
         </div>
 
         <div class="step-nav">
-          <button class="btn btn-outline" onclick="goToStep(3)">← 上一步</button>
-          <button class="btn btn-primary" onclick="goToStep(5)">確認 & 預覽 →</button>
+          <button class="btn btn-outline" onclick="goToStep(3)">← 上一步 Back</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">確認 Confirm →</button>
         </div>
       </div>
     </div>
@@ -760,11 +765,11 @@
     <!-- STEP 5: Confirm & Generate -->
     <div class="step-content" id="step-5" style="display:none;">
       <div class="card">
-        <h2>✅ 確認生成 Confirm</h2>
+        <h2>✅ 確認生成 Confirm & Generate</h2>
         <div id="summary-content" style="line-height: 1.8;"></div>
 
         <div class="step-nav" style="margin-top: 20px;">
-          <button class="btn btn-outline" onclick="goToStep(4)">← 修改</button>
+          <button class="btn btn-outline" onclick="goToStep(4)">← 修改 Edit</button>
           <button class="btn btn-primary btn-full" id="btn-generate" onclick="generateGames()">
             🎯 ✨ 生成遊戲 Let's Go!
           </button>
@@ -777,8 +782,8 @@
       <div class="card">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <div class="loading-text">🎯 AI 正在設計遊戲...</div>
-          <div class="loading-sub">通常需要 20-40 秒，請稍候</div>
+          <div class="loading-text">🎯 AI 正在設計遊戲... Designing your games...</div>
+          <div class="loading-sub">通常需要 20-40 秒 · Usually takes 20–40 seconds, please wait...</div>
         </div>
       </div>
     </div>
@@ -791,9 +796,9 @@
             <button class="view-toggle-btn active" onclick="switchResultView('formatted', this)">📖 格式化</button>
             <button class="view-toggle-btn" onclick="switchResultView('markdown', this)">📝 Markdown</button>
           </div>
-          <button class="btn btn-small btn-outline" onclick="copyMarkdown()">📋 複製 Markdown</button>
-          <button class="btn btn-small btn-outline" onclick="openEmailModal()">📧 發送 Email</button>
-          <button class="btn btn-small btn-secondary" onclick="resetForm()">✨ 再生成一組</button>
+          <button class="btn btn-small btn-outline" onclick="copyMarkdown()">📋 複製 Copy Markdown</button>
+          <button class="btn btn-small btn-outline" onclick="openEmailModal()">📧 發送 Send Email</button>
+          <button class="btn btn-small btn-secondary" onclick="resetForm()">✨ 再生成一組 Generate Again</button>
         </div>
 
         <div id="result-formatted" class="result-content"></div>
@@ -836,14 +841,14 @@
 <!-- EMAIL MODAL -->
 <div class="modal-overlay" id="email-modal">
   <div class="modal">
-    <h3>📧 發送遊戲手冊</h3>
+    <h3>📧 發送遊戲手冊 Send Game Booklet</h3>
     <div class="form-group">
-      <label>Email 地址</label>
+      <label>Email 地址 Email Address</label>
       <input type="email" id="modal-email" placeholder="your@email.com">
     </div>
     <div class="btn-group">
-      <button class="btn btn-primary" onclick="sendEmail()">📧 發送</button>
-      <button class="btn btn-outline" onclick="closeEmailModal()">取消</button>
+      <button class="btn btn-primary" onclick="sendEmail()">📧 發送 Send</button>
+      <button class="btn btn-outline" onclick="closeEmailModal()">取消 Cancel</button>
     </div>
   </div>
 </div>
@@ -1269,7 +1274,7 @@ function toggleChildren() {
   const section = document.getElementById('children-section');
 
   toggle.classList.toggle('on', includeChildren);
-  label.textContent = includeChildren ? '包括兒童 ✓' : '不包括兒童';
+  label.textContent = includeChildren ? '包括兒童 ✓' : '不包括兒童 No children';
   section.classList.toggle('show', includeChildren);
 }
 
@@ -1279,7 +1284,7 @@ function toggleDebrief() {
   const label = document.getElementById('toggle-debrief-label');
 
   toggle.classList.toggle('on', includeDebrief);
-  label.textContent = includeDebrief ? '包含反思問題（含聖經經文）' : '不包含反思問題';
+  label.textContent = includeDebrief ? '包含反思問題 Include debrief（含聖經經文）' : '不包含反思問題 No debrief';
 }
 
 // ===== Get Form Values =====
