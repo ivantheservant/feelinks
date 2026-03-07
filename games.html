@@ -856,8 +856,8 @@
       <div class="card">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <div class="loading-text">🎯 AI 正在設計遊戲... Designing your games...</div>
-          <div class="loading-sub">通常需要 20-40 秒 · Usually takes 20–40 seconds, please wait...</div>
+          <div class="loading-text" id="loading-text">🎯 AI 正在設計遊戲... Designing your games...</div>
+          <div class="loading-sub" id="loading-sub">雙版本比較中，約需 40-70 秒 · Comparing two versions, ~40–70 seconds...</div>
         </div>
       </div>
     </div>
@@ -873,7 +873,9 @@
           <button class="btn btn-small btn-outline" onclick="copyMarkdown()">📋 複製 Copy Markdown</button>
           <button class="btn btn-small btn-outline" onclick="openEmailModal()">📧 發送 Send Email</button>
           <button class="btn btn-small btn-secondary" onclick="resetForm()">✨ 再生成一組 Generate Again</button>
+          <button class="btn btn-small btn-outline" id="btn-toggle-version" style="display:none;" onclick="toggleVersion()">🔄 查看另一版本 See alternative</button>
         </div>
+        <div id="version-badge" style="display:none; margin:8px 0 4px; font-size:12px; color:#666;"></div>
 
         <div id="result-formatted" class="result-content"></div>
         <div id="result-markdown" class="markdown-raw" style="display:none;"></div>
@@ -940,6 +942,10 @@ let includeChildren = false;
 let includeDebrief = true;
 let currentGameSetId = null;
 let currentMarkdown = '';
+let currentMarkdownA = '';
+let currentMarkdownB = '';
+let currentWinner = 'A';
+let showingVersion = 'winner';
 
 // ===== View Switching =====
 function showView(name) {
@@ -1382,26 +1388,6 @@ function goToStep2Next() {
     return;
   }
 
-  // Soft warn: time too short per game
-  const gameCount = parseInt(getSelectedRadio('rg-gamecount') || '3', 10);
-  const minPerGame = 10; // reasonable minimum minutes per game
-  if (timeVal && gameCount && (timeVal / gameCount) < minPerGame) {
-    const perGame = Math.round(timeVal / gameCount);
-    if (warningEl.style.display !== 'block') {
-      warningEl.innerHTML =
-        `⏱️ 每個遊戲只有約 <strong>${perGame} 分鐘</strong> — 建議每個遊戲至少 ${minPerGame} 分鐘<br>` +
-        `Each game gets ~<strong>${perGame} min</strong> — recommend at least ${minPerGame} min/game<br><br>` +
-        '<button class="btn btn-small btn-outline" style="margin-right:8px" onclick="clearTimeWarning()">' +
-          '← 返回調整 Adjust' +
-        '</button>' +
-        '<button class="btn btn-small btn-primary" onclick="clearTimeWarning(); goToStep(3);">' +
-          '繼續 Proceed anyway →' +
-        '</button>';
-      warningEl.style.display = 'block';
-      return;
-    }
-  }
-
   goToStep(3);
 }
 
@@ -1464,7 +1450,7 @@ function getFormData() {
     includeChildren: includeChildren ? 'yes' : 'no',
     childrenAgeRange: includeChildren ? document.getElementById('f-childrenAgeRange').value.trim() : '',
     venue: getSelectedRadio('rg-venue'),
-    availableTime: (() => { const t = document.getElementById('f-availableTime').value.trim(); return t ? t + '分鐘' : ''; })(),
+    availableTime: (document.getElementById('f-availableTime').value.trim() || '') + (document.getElementById('f-availableTime').value.trim() ? '分鐘' : ''),
     gameTypes: getSelectedChips('cg-gametype').join('、'),
     gameCount: getSelectedRadio('rg-gamecount') || '3',
     language: getSelectedRadio('rg-language') || '繁體中文',
@@ -1496,7 +1482,7 @@ function buildSummary() {
   if (d.gameTypes) addLine('🎮', '遊戲類型 Type', d.gameTypes);
   addLine('🏠', '場地', d.venue);
   addLine('⏱️', '時間', d.availableTime);
-  addLine('🎲', '遊戲數量 No. of Games', d.gameCount);
+  addLine('🎮', '遊戲數量', d.gameCount);
   addLine('🌐', '語言', d.language);
   if (d.specialRequirements) addLine('⚠️', '特別要求', d.specialRequirements);
   addLine('🔀', '分組', d.groupingRule);
@@ -1513,11 +1499,17 @@ function generateGames() {
   const data = getFormData();
   data.action = 'generateGames';
 
+  // Reset dual-version state
+  currentMarkdownA = '';
+  currentMarkdownB = '';
+  currentWinner = 'A';
+  showingVersion = 'winner';
+
   // Show loading
   document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
   document.getElementById('step-generating').style.display = 'block';
 
-  // API call via GET (encode data as JSON in URL param)
+  // API call via GET
   const url = API_URL + '?action=generateGames&data=' + encodeURIComponent(JSON.stringify(data));
 
   fetch(url)
@@ -1526,7 +1518,26 @@ function generateGames() {
       if (result.success) {
         currentGameSetId = result.gameSetId;
         currentMarkdown = result.markdownContent;
+
+        // Store dual versions
+        currentMarkdownA = result.markdownA || result.markdownContent;
+        currentMarkdownB = result.markdownB || result.markdownContent;
+        currentWinner = result.winner || 'A';
+
         showResult(result.markdownContent);
+
+        // Show toggle button if two different versions exist
+        const toggleBtn = document.getElementById('btn-toggle-version');
+        const badge = document.getElementById('version-badge');
+        if (result.hasRefs && currentMarkdownA !== currentMarkdownB) {
+          toggleBtn.style.display = 'inline-block';
+          const winLabel = currentWinner === 'A' ? '📚 參考版 Reference' : '🤖 原創版 Original';
+          badge.innerHTML = '✅ AI 推薦：' + winLabel + '（' + result.refCount + ' 個參考遊戲匹配）';
+          badge.style.display = 'block';
+        } else {
+          toggleBtn.style.display = 'none';
+          badge.style.display = 'none';
+        }
 
         if (result.emailError) {
           showToast('遊戲已生成，但 Email 發送失敗：' + result.emailError, 'error');
@@ -1562,6 +1573,26 @@ function switchResultView(view, btn) {
 
   document.getElementById('result-formatted').style.display = view === 'formatted' ? 'block' : 'none';
   document.getElementById('result-markdown').style.display = view === 'markdown' ? 'block' : 'none';
+}
+
+function toggleVersion() {
+  if (showingVersion === 'winner') {
+    const altMarkdown = (currentWinner === 'A') ? currentMarkdownB : currentMarkdownA;
+    showResult(altMarkdown);
+    currentMarkdown = altMarkdown;
+    showingVersion = 'alt';
+    document.getElementById('btn-toggle-version').innerHTML = '🔄 返回推薦版 Back to recommended';
+    const altLabel = (currentWinner === 'A') ? '🤖 原創版 Original' : '📚 參考版 Reference';
+    document.getElementById('version-badge').innerHTML = '👀 目前顯示：' + altLabel;
+  } else {
+    const winMarkdown = (currentWinner === 'A') ? currentMarkdownA : currentMarkdownB;
+    showResult(winMarkdown);
+    currentMarkdown = winMarkdown;
+    showingVersion = 'winner';
+    document.getElementById('btn-toggle-version').innerHTML = '🔄 查看另一版本 See alternative';
+    const winLabel = (currentWinner === 'A') ? '📚 參考版 Reference' : '🤖 原創版 Original';
+    document.getElementById('version-badge').innerHTML = '✅ AI 推薦：' + winLabel;
+  }
 }
 
 // ===== Simple Markdown Renderer =====
