@@ -1756,6 +1756,14 @@ function loadGameSet(gameSetId) {
         currentGameSetId = result.gameSet.id;
         currentMarkdown = result.gameSet.markdownContent;
 
+        // Reset dual-version state (history has single version only)
+        currentMarkdownA = '';
+        currentMarkdownB = '';
+        currentWinner = 'A';
+        showingVersion = 'winner';
+        document.getElementById('btn-toggle-version').style.display = 'none';
+        document.getElementById('version-badge').style.display = 'none';
+
         // Switch to create view and show result
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById('view-create').classList.add('active');
@@ -1780,6 +1788,12 @@ function resetForm() {
   // Clear selections (keep defaults)
   currentGameSetId = null;
   currentMarkdown = '';
+  currentMarkdownA = '';
+  currentMarkdownB = '';
+  currentWinner = 'A';
+  showingVersion = 'winner';
+  document.getElementById('btn-toggle-version').style.display = 'none';
+  document.getElementById('version-badge').style.display = 'none';
 }
 
 // ===== Toast =====
