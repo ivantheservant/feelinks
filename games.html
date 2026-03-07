@@ -216,6 +216,49 @@
     }
     .form-group textarea { min-height: 80px; resize: vertical; }
     .hint { font-size: 0.82em; color: var(--text-muted); margin-top: 5px; }
+    .label-hint { font-size: 0.82em; font-weight: 400; color: var(--text-muted); }
+    .time-input-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .time-input-row input[type="number"] {
+      width: 100px;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1em;
+      font-weight: 700;
+      color: var(--text);
+      background: white;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      -moz-appearance: textfield;
+    }
+    .time-input-row input[type="number"]::-webkit-inner-spin-button,
+    .time-input-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .time-input-row input[type="number"]:focus {
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+    }
+    .time-input-row input[type="number"].input-error {
+      border-color: var(--danger);
+      box-shadow: 0 0 0 3px rgba(198,40,40,0.12);
+    }
+    .time-unit { font-size: 0.88em; font-weight: 600; color: var(--text-light); }
+    .time-warning {
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: #FFF8E1;
+      border: 1.5px solid #FFD54F;
+      border-radius: 10px;
+      font-size: 0.88em;
+      color: #795548;
+      line-height: 1.5;
+    }
+    .time-warning strong { color: var(--warning); }
 
     /* ===== Buttons ===== */
     .btn {
@@ -607,6 +650,36 @@
         <h2>⚙️ 活動設定 Settings</h2>
 
         <div class="form-group">
+          <label>遊戲類型 Game Type <span class="label-hint">（可多選 Multi-select）</span></label>
+          <div class="chip-group" id="cg-gametype">
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="破冰遊戲"> 🧊 破冰遊戲 Icebreaker
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="團隊建立"> 🤝 團隊建立 Team Building
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="競賽挑戰"> 🏆 競賽挑戰 Competition
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="創意協作"> 🎨 創意協作 Creative Collab
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="溝通分享"> 💬 溝通分享 Communication
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="信仰主題"> 🙏 信仰主題 Faith-based
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="解難任務"> 🎯 解難任務 Problem Solving
+            </label>
+            <label class="chip" onclick="toggleChip(this, event)">
+              <input type="checkbox" value="戲劇角色扮演"> 🎭 戲劇角色扮演 Drama / Role Play
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
           <label>場地 Venue</label>
           <div class="radio-group" id="rg-venue">
             <div class="radio-chip" data-value="室內" onclick="selectRadio(this)">🏠 室內 Indoor</div>
@@ -618,12 +691,13 @@
         <div class="form-row">
           <div class="form-group">
             <label>可用時間 Available Time</label>
-            <div class="radio-group" id="rg-time">
-              <div class="radio-chip" data-value="30分鐘" onclick="selectRadio(this)">30 min</div>
-              <div class="radio-chip" data-value="1小時" onclick="selectRadio(this)">1 hr</div>
-              <div class="radio-chip" data-value="1.5小時" onclick="selectRadio(this)">1.5 hr</div>
-              <div class="radio-chip" data-value="2小時以上" onclick="selectRadio(this)">2+ hr</div>
+            <div class="time-input-row">
+              <input type="number" id="f-availableTime" min="5" max="480"
+                     placeholder="e.g. 60" oninput="clearTimeWarning()">
+              <span class="time-unit">分鐘 min</span>
             </div>
+            <div class="hint">最少 5 分鐘 · Minimum 5 minutes</div>
+            <div class="time-warning" id="time-warning" style="display:none;"></div>
           </div>
           <div class="form-group">
             <label>遊戲數量 Number of Games</label>
@@ -646,7 +720,7 @@
 
         <div class="step-nav">
           <button class="btn btn-outline" onclick="goToStep(1)">← 上一步 Back</button>
-          <button class="btn btn-primary" onclick="goToStep(3)">下一步 Next →</button>
+          <button class="btn btn-primary" onclick="goToStep2Next()">下一步 Next →</button>
         </div>
       </div>
     </div>
@@ -1252,6 +1326,85 @@ function goToStep(step) {
 }
 
 // ===== Radio Chips =====
+
+// ===== Time Warning Mins by Game Type =====
+const GAME_TYPE_MIN_TIMES = {
+  '破冰遊戲':   10,
+  '團隊建立':   20,
+  '競賽挑戰':   15,
+  '創意協作':   20,
+  '溝通分享':   15,
+  '信仰主題':   20,
+  '解難任務':   20,
+  '戲劇角色扮演': 15,
+};
+
+function clearTimeWarning() {
+  document.getElementById('time-warning').style.display = 'none';
+  document.getElementById('f-availableTime').classList.remove('input-error');
+}
+
+function goToStep2Next() {
+  const timeVal = parseInt(document.getElementById('f-availableTime').value, 10);
+  const warningEl = document.getElementById('time-warning');
+
+  // Hard block: under 5 min or empty
+  if (!timeVal || timeVal < 5) {
+    document.getElementById('f-availableTime').classList.add('input-error');
+    warningEl.innerHTML = '⚠️ <strong>請輸入至少 5 分鐘 / Please enter at least 5 minutes.</strong>';
+    warningEl.style.display = 'block';
+    return;
+  }
+
+  // Soft warn: time too short for selected game types
+  const selectedTypes = getSelectedChips('cg-gametype');
+  let warnMessages = [];
+  selectedTypes.forEach(type => {
+    const minTime = GAME_TYPE_MIN_TIMES[type];
+    if (minTime && timeVal < minTime) {
+      warnMessages.push(`<strong>${type}</strong> 建議至少 ${minTime} 分鐘 (recommended min ${minTime} min)`);
+    }
+  });
+
+  if (warnMessages.length > 0 && warningEl.style.display !== 'block') {
+    // Show warning, add "Proceed anyway" button
+    warningEl.innerHTML =
+      '⚠️ 時間可能不足 Time may be tight:<br>' +
+      warnMessages.join('<br>') +
+      '<br><br>' +
+      '<button class="btn btn-small btn-outline" style="margin-right:8px" onclick="clearTimeWarning()">' +
+        '← 返回調整 Adjust time' +
+      '</button>' +
+      '<button class="btn btn-small btn-primary" onclick="clearTimeWarning(); goToStep(3);">' +
+        '繼續 Proceed anyway →' +
+      '</button>';
+    warningEl.style.display = 'block';
+    return;
+  }
+
+  // Soft warn: time too short per game
+  const gameCount = parseInt(getSelectedRadio('rg-gamecount') || '3', 10);
+  const minPerGame = 10; // reasonable minimum minutes per game
+  if (timeVal && gameCount && (timeVal / gameCount) < minPerGame) {
+    const perGame = Math.round(timeVal / gameCount);
+    if (warningEl.style.display !== 'block') {
+      warningEl.innerHTML =
+        `⏱️ 每個遊戲只有約 <strong>${perGame} 分鐘</strong> — 建議每個遊戲至少 ${minPerGame} 分鐘<br>` +
+        `Each game gets ~<strong>${perGame} min</strong> — recommend at least ${minPerGame} min/game<br><br>` +
+        '<button class="btn btn-small btn-outline" style="margin-right:8px" onclick="clearTimeWarning()">' +
+          '← 返回調整 Adjust' +
+        '</button>' +
+        '<button class="btn btn-small btn-primary" onclick="clearTimeWarning(); goToStep(3);">' +
+          '繼續 Proceed anyway →' +
+        '</button>';
+      warningEl.style.display = 'block';
+      return;
+    }
+  }
+
+  goToStep(3);
+}
+
 function selectRadio(el) {
   const group = el.parentElement;
   group.querySelectorAll('.radio-chip').forEach(c => c.classList.remove('selected'));
@@ -1311,7 +1464,8 @@ function getFormData() {
     includeChildren: includeChildren ? 'yes' : 'no',
     childrenAgeRange: includeChildren ? document.getElementById('f-childrenAgeRange').value.trim() : '',
     venue: getSelectedRadio('rg-venue'),
-    availableTime: getSelectedRadio('rg-time'),
+    availableTime: (() => { const t = document.getElementById('f-availableTime').value.trim(); return t ? t + '分鐘' : ''; })(),
+    gameTypes: getSelectedChips('cg-gametype').join('、'),
     gameCount: getSelectedRadio('rg-gamecount') || '3',
     language: getSelectedRadio('rg-language') || '繁體中文',
     specialRequirements: allRequirements,
@@ -1339,9 +1493,10 @@ function buildSummary() {
   if (d.includeChildren === 'yes') {
     addLine('👶', '兒童', `包括（${d.childrenAgeRange} 歲）`);
   }
+  if (d.gameTypes) addLine('🎮', '遊戲類型 Type', d.gameTypes);
   addLine('🏠', '場地', d.venue);
   addLine('⏱️', '時間', d.availableTime);
-  addLine('🎮', '遊戲數量', d.gameCount);
+  addLine('🎲', '遊戲數量 No. of Games', d.gameCount);
   addLine('🌐', '語言', d.language);
   if (d.specialRequirements) addLine('⚠️', '特別要求', d.specialRequirements);
   addLine('🔀', '分組', d.groupingRule);
