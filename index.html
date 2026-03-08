@@ -22,19 +22,22 @@
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    html { overflow: hidden; }
+    html { overflow-x: hidden; }
     body {
       font-family: "Helvetica Neue", Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
       background: var(--cream);
       color: var(--text-dark);
       line-height: 1.6;
       overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
     }
-    /* When embedded in iframe, hide body scroll and let parent scroll */
-    @media all {
-      body.in-iframe { overflow: hidden; }
+    /* When in iframe: hide scrollbar visually but keep scroll working,
+       so position:fixed still works correctly for toast/modals */
+    body.in-iframe {
+      scrollbar-width: none;           /* Firefox */
+      -ms-overflow-style: none;        /* IE/Edge */
+    }
+    body.in-iframe::-webkit-scrollbar {
+      display: none;                   /* Chrome/Safari */
     }
     
     .container {
@@ -1127,6 +1130,14 @@
         </div>
       </div>
       
+      <!-- Email (Optional) -->
+      <div class="section-divider"></div>
+      <div class="form-group">
+        <label>📧 <span data-i18n="emailLabel">接收結果（選填）</span></label>
+        <input type="email" id="profile-email" data-i18n-placeholder="emailPlaceholder">
+        <div class="hint" data-i18n="emailHint">輸入 Email 將問題卡組寄給你或小組長</div>
+      </div>
+      
       <div class="btn-group" style="margin-top: 30px;">
         <button type="button" class="btn btn-outline-teal" onclick="showView('select-profile')">
           <span data-i18n="cancel">取消</span>
@@ -1540,6 +1551,11 @@ const translations = {
     aiCategoriesPlaceholder: "例如：學業壓力, 人際關係, 信仰掙扎",
     aiCategoriesHint: "用逗號分隔多個分類",
     aiCount: "生成數量",
+    emailLabel: "接收結果（選填）",
+    emailPlaceholder: "例如：leader@church.org",
+    emailHint: "輸入 Email 將問題卡組寄給你或小組長",
+    emailSent: "已寄出！",
+    emailFailed: "寄送失敗",
     cancel: "取消",
     createProfile: "創建卡組",
     tabPlay: "🎲 抽題",
@@ -1634,6 +1650,11 @@ const translations = {
     aiCategoriesPlaceholder: "e.g., Academic pressure, Relationships, Faith struggles",
     aiCategoriesHint: "Separate multiple categories with commas",
     aiCount: "Generation Count",
+    emailLabel: "Receive Results (Optional)",
+    emailPlaceholder: "e.g., leader@church.org",
+    emailHint: "Enter email to receive the question deck",
+    emailSent: "Email sent!",
+    emailFailed: "Email failed",
     cancel: "Cancel",
     createProfile: "Create Deck",
     tabPlay: "🎲 Draw",
@@ -1830,14 +1851,11 @@ function updateCounts() {
   document.getElementById('research-count').textContent = `${researchCount} ${t('selected')}`;
 }
 
-// API calls
+// API calls — MUST use GET (not POST) for GAS external frontend (CORS/405 issue)
 async function apiCall(action, data = {}) {
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action, ...data }),
-      headers: { 'Content-Type': 'application/json' }
-    });
+    const params = new URLSearchParams({ action: action, data: JSON.stringify(data) });
+    const response = await fetch(API_URL + '?' + params.toString());
     return await response.json();
   } catch (error) {
     return { success: false, error: error.toString() };
@@ -1892,20 +1910,7 @@ async function selectProfile(profileId) {
 
 async function loadGeneralCategories() {
   const container = document.getElementById('general-categories');
-  
-  // Try POST first, fallback to GET if it fails
-  let result = await apiCall('getGeneralCategories');
-  
-  // If POST failed, try GET as fallback
-  if (!result.success) {
-    try {
-      const getUrl = API_URL + '?action=getGeneralCategories';
-      const resp = await fetch(getUrl);
-      result = await resp.json();
-    } catch (e) {
-      result = { success: false, error: 'GET fallback failed: ' + e.toString() };
-    }
-  }
+  const result = await apiCall('getGeneralCategories');
   
   if (!result.success || !result.categories || result.categories.length === 0) {
     const errMsg = result.error || 'Empty categories';
@@ -1965,7 +1970,8 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
     description: document.getElementById('profile-description').value,
     includeGeneralCategories: selectedCategories,
     generateAI: generateAI,
-    researchTypes: selectedResearchTypes  // New field
+    email: document.getElementById('profile-email').value.trim(),
+    researchTypes: selectedResearchTypes
   };
   
   if (generateAI) {
@@ -1976,7 +1982,7 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
       theme: document.getElementById('ai-theme').value,
       categories: document.getElementById('ai-categories').value,
       questionCount: parseInt(document.getElementById('ai-count').value),
-      researchTypes: selectedResearchTypes  // Pass research types to AI
+      researchTypes: selectedResearchTypes
     };
   }
   
@@ -1986,7 +1992,15 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   submitBtn.textContent = t('createProfile');
   
   if (result.success) {
-    showToast(`${t('createSuccess')} ${result.questionCount} ${t('questions')}`, 'success');
+    let msg = `${t('createSuccess')} ${result.questionCount} ${t('questions')}`;
+    
+    // Send email if provided
+    if (data.email) {
+      const emailResult = await apiCall('sendFeelEmail', { profileId: result.profileId, email: data.email });
+      msg += ' · ' + (emailResult.success ? t('emailSent') : t('emailFailed'));
+    }
+    
+    showToast(msg, 'success');
     showView('select-profile');
     loadProfiles();
   } else {
@@ -2039,19 +2053,11 @@ function getAllQuestions() {
 
 async function fetchQuotes() {
   try {
-    let result = await apiCall('getQuotes');
-    // If POST failed, try GET fallback
-    if (!result.success) {
-      try {
-        const resp = await fetch(API_URL + '?action=getQuotes');
-        result = await resp.json();
-      } catch (e) { /* ignore */ }
-    }
+    const result = await apiCall('getQuotes');
     if (result.success && result.quotes) {
       state.quotes = result.quotes;
     }
   } catch (e) {
-    // Quotes are optional — silently fail
     console.log('Quotes fetch failed (optional):', e);
   }
 }
