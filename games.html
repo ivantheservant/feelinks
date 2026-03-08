@@ -843,7 +843,7 @@
           <label>每個遊戲附帶反思分享問題？ Include Debrief?</label>
           <div class="toggle-row">
             <div class="toggle on" id="toggle-debrief" onclick="toggleDebrief()"></div>
-            <span class="toggle-label" id="toggle-debrief-label">包含反思問題 Include debrief（含聖經經文 with Bible verses）</span>
+            <span class="toggle-label" id="toggle-debrief-label">包含反思問題 Include debrief</span>
           </div>
         </div>
 
@@ -1433,6 +1433,11 @@ function selectRadio(el) {
   const group = el.parentElement;
   group.querySelectorAll('.radio-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
+  
+  // Update debrief label if relationship changed (faith context check)
+  if (group.id === 'rg-relationship') {
+    updateDebriefLabel();
+  }
 }
 
 // ===== Checkbox Chips =====
@@ -1441,6 +1446,12 @@ function toggleChip(el, event) {
   el.classList.toggle('selected');
   const cb = el.querySelector('input[type="checkbox"]');
   if (cb) cb.checked = el.classList.contains('selected');
+  
+  // Update debrief label if game type or purpose changed (faith context check)
+  const chipGroup = el.closest('.chip-group');
+  if (chipGroup && (chipGroup.id === 'cg-gametype' || chipGroup.id === 'cg-purposes')) {
+    updateDebriefLabel();
+  }
 }
 
 // ===== Toggles =====
@@ -1461,7 +1472,32 @@ function toggleDebrief() {
   const label = document.getElementById('toggle-debrief-label');
 
   toggle.classList.toggle('on', includeDebrief);
-  label.textContent = includeDebrief ? '包含反思問題 Include debrief（含聖經經文）' : '不包含反思問題 No debrief';
+  updateDebriefLabel();
+}
+
+// Update debrief label based on faith context
+function updateDebriefLabel() {
+  const label = document.getElementById('toggle-debrief-label');
+  if (!label) return;
+  
+  // Check if faith context is selected
+  const relationship = getSelectedRadio('rg-relationship');
+  const gameTypes = getSelectedChips('cg-gametype');
+  const purposes = getSelectedChips('cg-purposes');
+  
+  const isFaithContext = relationship === '教會弟兄姊妹' || 
+                         gameTypes.includes('信仰主題') || 
+                         purposes.includes('信仰反思');
+  
+  if (includeDebrief) {
+    if (isFaithContext) {
+      label.textContent = '包含反思問題 Include debrief（含聖經經文 with Bible verses）';
+    } else {
+      label.textContent = '包含反思問題 Include debrief';
+    }
+  } else {
+    label.textContent = '不包含反思問題 No debrief';
+  }
 }
 
 // ===== Get Form Values =====
@@ -1824,7 +1860,7 @@ function resetForm() {
   // Reset to step 1
   goToStep(1);
 
-  // Clear selections (keep defaults)
+  // Clear internal state
   currentGameSetId = null;
   currentMarkdown = '';
   currentMarkdownA = '';
@@ -1833,6 +1869,82 @@ function resetForm() {
   showingVersion = 'winner';
   document.getElementById('btn-toggle-version').style.display = 'none';
   document.getElementById('version-badge').style.display = 'none';
+  
+  // === BUG FIX: Clear ALL form fields ===
+  
+  // Step 1: Clear radio chips (relationship, familiarity)
+  document.querySelectorAll('#step-1 .radio-chip').forEach(chip => {
+    chip.classList.remove('selected');
+  });
+  // Clear text inputs in step 1
+  const ageRange = document.getElementById('f-ageRange');
+  const participantCount = document.getElementById('f-participantCount');
+  if (ageRange) ageRange.value = '';
+  if (participantCount) participantCount.value = '';
+  // Clear children toggle and fields
+  const childrenToggle = document.getElementById('toggle-children');
+  if (childrenToggle) {
+    childrenToggle.classList.remove('on');
+    const childrenFields = document.getElementById('children-fields');
+    if (childrenFields) childrenFields.style.display = 'none';
+    const childrenSection = document.getElementById('children-section');
+    if (childrenSection) childrenSection.classList.remove('show');
+  }
+  // Reset includeChildren state
+  includeChildren = false;
+  const childrenLabel = document.getElementById('toggle-children-label');
+  if (childrenLabel) childrenLabel.textContent = '不包括兒童 No children';
+  const childrenAgeRange = document.getElementById('f-childrenAgeRange');
+  if (childrenAgeRange) childrenAgeRange.value = '';
+  
+  // Step 2: Clear game type checkboxes and radio chips
+  document.querySelectorAll('#step-2 .chip input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.chip').classList.remove('selected');
+  });
+  document.querySelectorAll('#step-2 .radio-chip').forEach(chip => {
+    chip.classList.remove('selected');
+  });
+  // Set default language to 繁體中文
+  const langChip = document.querySelector('#step-2 .radio-chip[data-value="繁體中文"]');
+  if (langChip) langChip.classList.add('selected');
+  // Clear available time
+  const availableTime = document.getElementById('f-availableTime');
+  if (availableTime) availableTime.value = '';
+  
+  // Step 3: Clear restrictions checkboxes and radio chips
+  document.querySelectorAll('#step-3 .chip input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.chip').classList.remove('selected');
+  });
+  document.querySelectorAll('#step-3 .radio-chip').forEach(chip => {
+    chip.classList.remove('selected');
+  });
+  // Clear additional notes / other requirements
+  const otherRequirements = document.getElementById('f-otherRequirements');
+  if (otherRequirements) otherRequirements.value = '';
+  const additionalNotes = document.getElementById('f-additionalNotes');
+  if (additionalNotes) additionalNotes.value = '';
+  
+  // Step 4: Clear purpose checkboxes
+  document.querySelectorAll('#step-4 .chip input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.chip').classList.remove('selected');
+  });
+  // Reset debrief toggle to ON (default)
+  const debriefToggle = document.getElementById('toggle-debrief');
+  const debriefLabel = document.getElementById('toggle-debrief-label');
+  if (debriefToggle) {
+    debriefToggle.classList.add('on');
+    // Reset to non-faith context label (no Bible reference)
+    if (debriefLabel) debriefLabel.textContent = '包含反思問題 Include debrief';
+  }
+  // Reset includeDebrief state
+  includeDebrief = true;
+  
+  // Clear email field
+  const emailField = document.getElementById('f-email');
+  if (emailField) emailField.value = '';
 }
 
 // ===== Toast =====
