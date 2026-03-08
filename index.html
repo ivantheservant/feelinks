@@ -1882,11 +1882,26 @@ async function selectProfile(profileId) {
 }
 
 async function loadGeneralCategories() {
-  const result = await apiCall('getGeneralCategories');
   const container = document.getElementById('general-categories');
   
-  if (!result.success || !result.categories) {
-    container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 20px;">無法載入分類</p>';
+  // Try POST first, fallback to GET if it fails
+  let result = await apiCall('getGeneralCategories');
+  
+  // If POST failed, try GET as fallback
+  if (!result.success) {
+    try {
+      const getUrl = API_URL + '?action=getGeneralCategories';
+      const resp = await fetch(getUrl);
+      result = await resp.json();
+    } catch (e) {
+      result = { success: false, error: 'GET fallback failed: ' + e.toString() };
+    }
+  }
+  
+  if (!result.success || !result.categories || result.categories.length === 0) {
+    const errMsg = result.error || 'Empty categories';
+    container.innerHTML = `<p style="color: var(--text-light); text-align: center; padding: 20px;">無法載入分類 (${errMsg})</p>`;
+    console.error('loadGeneralCategories failed:', JSON.stringify(result));
     return;
   }
   
@@ -2014,7 +2029,14 @@ function getAllQuestions() {
 
 async function fetchQuotes() {
   try {
-    const result = await apiCall('getQuotes');
+    let result = await apiCall('getQuotes');
+    // If POST failed, try GET fallback
+    if (!result.success) {
+      try {
+        const resp = await fetch(API_URL + '?action=getQuotes');
+        result = await resp.json();
+      } catch (e) { /* ignore */ }
+    }
     if (result.success && result.quotes) {
       state.quotes = result.quotes;
     }
