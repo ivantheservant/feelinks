@@ -857,7 +857,7 @@
         <div class="loading">
           <div class="loading-spinner"></div>
           <div class="loading-text" id="loading-text">🎯 AI 正在設計遊戲... Designing your games...</div>
-          <div class="loading-sub" id="loading-sub">約需 30-60 秒 · Usually takes 30–60 seconds, please wait...</div>
+          <div class="loading-sub" id="loading-sub">約需 30-90 秒 · Usually takes 30–90 seconds, please wait...</div>
         </div>
       </div>
     </div>
@@ -958,6 +958,15 @@ function showView(name) {
 
   if (name === 'history') loadHistory();
   if (name === 'sample') renderSample();
+
+  // If switching to create view, reset form if currently showing results or generating
+  if (name === 'create') {
+    const resultVisible = document.getElementById('step-result').style.display === 'block';
+    const generatingVisible = document.getElementById('step-generating').style.display === 'block';
+    if (resultVisible || generatingVisible) {
+      resetForm();
+    }
+  }
 }
 
 // ===== Sample Data =====
