@@ -1791,19 +1791,20 @@ function populateResearchTypes() {
   const types = RESEARCH_QUESTION_TYPES[lang];
   
   container.innerHTML = types.map(type => `
-    <label class="checkbox-chip" data-type-id="${type.id}">
+    <div class="checkbox-chip" data-type-id="${type.id}">
       <input type="checkbox" name="research-type" value="${type.id}">
       <div class="checkbox-icon"></div>
       <div style="flex: 1;">
         <div class="chip-label">${type.name}</div>
         <div class="chip-desc">${type.desc}</div>
       </div>
-    </label>
+    </div>
   `).join('');
   
   // Add click handlers
   container.querySelectorAll('.checkbox-chip').forEach(chip => {
-    chip.addEventListener('click', function() {
+    chip.addEventListener('click', function(e) {
+      e.preventDefault();
       this.classList.toggle('selected');
       const checkbox = this.querySelector('input[type="checkbox"]');
       checkbox.checked = this.classList.contains('selected');
@@ -1906,18 +1907,19 @@ async function loadGeneralCategories() {
   }
   
   container.innerHTML = result.categories.map(cat => `
-    <label class="checkbox-chip">
+    <div class="checkbox-chip">
       <input type="checkbox" name="general-cat" value="${cat.name}">
       <div class="checkbox-icon"></div>
       <div style="flex: 1;">
         <div class="chip-label">${cat.name}</div>
       </div>
       <div class="chip-count">${cat.count}</div>
-    </label>
+    </div>
   `).join('');
   
   container.querySelectorAll('.checkbox-chip').forEach(chip => {
-    chip.addEventListener('click', function() {
+    chip.addEventListener('click', function(e) {
+      e.preventDefault();
       this.classList.toggle('selected');
       const checkbox = this.querySelector('input[type="checkbox"]');
       checkbox.checked = this.classList.contains('selected');
