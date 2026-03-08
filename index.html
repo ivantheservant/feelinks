@@ -1056,8 +1056,7 @@
   <p class="app-subtitle" data-i18n="appSubtitle">情緒連結卡牌遊戲</p>
   
   <div class="lang-selector">
-    <button class="lang-btn" data-lang="tc" onclick="setLanguage('tc')">中</button>
-    <button class="lang-btn active" data-lang="tc-en" onclick="setLanguage('tc-en')">中英</button>
+    <button class="lang-btn active" data-lang="tc" onclick="setLanguage('tc')">中</button>
     <button class="lang-btn" data-lang="en" onclick="setLanguage('en')">EN</button>
   </div>
 </div>
@@ -1826,7 +1825,7 @@ const EMOTIONS = {
 };
 
 // State
-let currentLang = localStorage.getItem('feelinks_lang') || 'tc-en';
+let currentLang = localStorage.getItem('feelinks_lang') || 'tc';
 let state = {
   currentProfile: null,
   questions: {},
@@ -1848,6 +1847,7 @@ function setLanguage(lang) {
   });
   
   updateTranslations();
+  updateResearchTypesLabels();
   
   if (state.currentProfile) {
     populateEmotions();
@@ -1938,6 +1938,31 @@ function populateResearchTypes() {
     });
   });
   _researchTypesLoaded = true;
+}
+
+// Update research types labels when language changes (preserve selections)
+function updateResearchTypesLabels() {
+  const container = document.getElementById('research-types');
+  if (!container || !_researchTypesLoaded) return;
+  
+  const lang = currentLang === 'en' ? 'en' : 'tc';
+  const types = RESEARCH_QUESTION_TYPES[lang];
+  
+  // Create a map of id -> type for quick lookup
+  const typeMap = {};
+  types.forEach(t => { typeMap[t.id] = t; });
+  
+  // Update each chip's label and description
+  container.querySelectorAll('.checkbox-chip').forEach(chip => {
+    const typeId = chip.dataset.typeId;
+    const type = typeMap[typeId];
+    if (type) {
+      const labelEl = chip.querySelector('.chip-label');
+      const descEl = chip.querySelector('.chip-desc');
+      if (labelEl) labelEl.textContent = type.name;
+      if (descEl) descEl.textContent = type.desc;
+    }
+  });
 }
 
 // Update selection counts
