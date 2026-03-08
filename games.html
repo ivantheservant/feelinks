@@ -481,18 +481,47 @@
     }
 
     /* ===== History ===== */
-    .history-item {
-      padding: 14px;
-      border: 1px solid var(--border);
+    .history-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border: 1.5px solid var(--border);
+      border-left: 4px solid var(--primary-light);
       border-radius: 12px;
       margin-bottom: 10px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
       background: white;
+      position: relative;
     }
-    .history-item:hover { border-color: var(--primary-light); background: var(--chip-bg); }
-    .history-item .hi-meta { font-size: 0.82em; color: var(--text-muted); margin-bottom: 4px; }
-    .history-item .hi-preview { font-size: 0.9em; color: var(--text); }
+    .history-card .info { flex: 1; }
+    .history-card .info h4 {
+      font-weight: 600; font-size: 1.05em; color: var(--primary-dark);
+      margin: 0 0 4px; transition: color 0.2s;
+    }
+    .history-card .info p {
+      font-size: 0.85em; color: var(--text-muted); margin: 0;
+    }
+    .history-card .meta {
+      font-size: 0.78em; color: var(--text-muted); white-space: nowrap;
+    }
+    .history-card .hc-arrow {
+      font-size: 1.4em; color: var(--text-muted); transition: all 0.2s;
+      padding: 0 2px; flex-shrink: 0;
+    }
+    .history-card:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(42, 96, 73, 0.12);
+      border-color: var(--primary-light);
+      background: #f2faf5;
+    }
+    .history-card:hover .info h4 { color: var(--primary); }
+    .history-card:hover .hc-arrow { color: var(--primary); transform: translateX(4px); }
+    .history-card:active {
+      transform: translateX(2px);
+      box-shadow: 0 1px 6px rgba(42, 96, 73, 0.08);
+    }
 
     /* ===== Toast ===== */
     .toast {
@@ -1743,6 +1772,7 @@ function loadHistory() {
             <div class="meta">
               ${g.createdAt ? new Date(g.createdAt).toLocaleDateString() : ''}
             </div>
+            <div class="hc-arrow">›</div>
           </div>
         `).join('');
       } else {
