@@ -762,20 +762,51 @@
       position: fixed;
       bottom: 30px;
       left: 50%;
-      transform: translateX(-50%);
+      transform: translateX(-50%) translateY(20px);
       background: var(--brown);
       color: white;
-      padding: 14px 28px;
+      padding: 16px 32px;
       border-radius: 30px;
-      z-index: 1000;
+      z-index: 2000;
       opacity: 0;
-      transition: opacity 0.3s;
-      box-shadow: 0 4px 20px var(--shadow);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.25);
+      font-size: 1.05em;
+      font-weight: 500;
+      max-width: 90%;
+      text-align: center;
+      pointer-events: none;
     }
     
-    .toast.show { opacity: 1; }
-    .toast.success { background: #4CAF50; }
-    .toast.error { background: #F44336; }
+    .toast.show { 
+      opacity: 1; 
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.success { 
+      background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%); 
+    }
+    .toast.error { 
+      background: linear-gradient(135deg, #F44336 0%, #C62828 100%); 
+    }
+    
+    /* Loading dots animation for AI generation */
+    .loading-dots::after {
+      content: '';
+      animation: loadingDots 1.5s infinite;
+    }
+    @keyframes loadingDots {
+      0%, 20% { content: ''; }
+      40% { content: '.'; }
+      60% { content: '..'; }
+      80%, 100% { content: '...'; }
+    }
+    
+    #btn-create-submit {
+      min-width: 180px;
+      min-height: 50px;
+      white-space: normal;
+      line-height: 1.3;
+    }
     
     .nav-tabs {
       display: flex;
@@ -1212,6 +1243,10 @@
         <label>📧 <span data-i18n="emailLabel">接收結果（選填）</span></label>
         <input type="email" id="profile-email" data-i18n-placeholder="emailPlaceholder">
         <div class="hint" data-i18n="emailHint">輸入 Email 將問題卡組寄給你或小組長</div>
+        <label class="remember-email-label" style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 0.9em; cursor: pointer;">
+          <input type="checkbox" id="remember-email" style="width: 18px; height: 18px; cursor: pointer;">
+          <span data-i18n="rememberEmail">記住我的 Email</span>
+        </label>
       </div>
       
       <div class="btn-group" style="margin-top: 30px;">
@@ -1699,7 +1734,11 @@ const translations = {
     customGeneration: "自訂生成",
     selected: "已選",
     viewCardRecords: "卡組記錄",
-    aiOutputLang: "輸出語言"
+    aiOutputLang: "輸出語言",
+    rememberEmail: "記住我的 Email",
+    generating: "AI 正在生成問題...",
+    generatingWait: "（約需 15-25 秒，請稍候）",
+    duplicateWarning: "已存在同名卡組，確定要繼續創建嗎？"
   },
   en: {
     appTitle: "Feel Interlink",
@@ -1801,7 +1840,11 @@ const translations = {
     customGeneration: "Custom Generation",
     selected: "selected",
     viewCardRecords: "Card Set Records",
-    aiOutputLang: "Output Language"
+    aiOutputLang: "Output Language",
+    rememberEmail: "Remember my email",
+    generating: "AI is generating questions...",
+    generatingWait: "(~15-25 seconds, please wait)",
+    duplicateWarning: "A deck with this name already exists. Create anyway?"
   }
 };
 
@@ -2082,6 +2125,18 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   submitBtn.disabled = true;
   submitBtn.textContent = t('loading');
   
+  const profileName = document.getElementById('profile-name').value.trim();
+  
+  // Bug #4 fix: Check for duplicate profile names
+  const existingProfiles = await apiCall('listProfiles');
+  if (existingProfiles.success && existingProfiles.profiles.some(p => p.name === profileName)) {
+    if (!confirm(t('duplicateWarning'))) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = t('createProfile');
+      return;
+    }
+  }
+  
   const selectedCategories = Array.from(document.querySelectorAll('input[name="general-cat"]:checked'))
     .map(cb => cb.value);
   
@@ -2104,17 +2159,31 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
     return;
   }
   
+  // Bug #2 fix: Save email to localStorage if "Remember" is checked
+  const emailValue = document.getElementById('profile-email').value.trim();
+  const rememberEmail = document.getElementById('remember-email').checked;
+  if (rememberEmail && emailValue) {
+    localStorage.setItem('feelinks_email', emailValue);
+    localStorage.setItem('feelinks_remember_email', 'true');
+  } else if (!rememberEmail) {
+    localStorage.removeItem('feelinks_email');
+    localStorage.setItem('feelinks_remember_email', 'false');
+  }
+  
   const data = {
-    name: document.getElementById('profile-name').value,
+    name: profileName,
     type: document.getElementById('profile-type').value,
     description: document.getElementById('profile-description').value,
     includeGeneralCategories: selectedCategories,
     generateAI: generateAI,
-    email: document.getElementById('profile-email').value.trim(),
+    email: emailValue,
     researchTypes: selectedResearchTypes
   };
   
   if (generateAI) {
+    // Bug #1 fix: Show better loading state for AI generation
+    submitBtn.innerHTML = `<span class="loading-dots">${t('generating')}</span><br><small>${t('generatingWait')}</small>`;
+    
     // Get output language from selector
     const outputLangCode = document.getElementById('ai-output-language').value;
     const outputLangMap = { 'tc': '繁體中文', 'tc-en': '繁體中文+英文', 'en': 'English' };
@@ -2158,17 +2227,29 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
 });
 
 // Populate categories
-// Bug #2 fix: Reset create form to blank state
+// Bug #2 fix: Reset create form to blank state (but preserve remembered email)
 function resetCreateForm() {
   document.getElementById('profile-name').value = '';
   document.getElementById('profile-type').value = '';
   document.getElementById('profile-description').value = '';
-  document.getElementById('profile-email').value = '';
   document.getElementById('ai-group-type').value = '';
   document.getElementById('ai-audience').value = '';
   document.getElementById('ai-theme').value = '';
   document.getElementById('ai-categories').value = '';
   document.getElementById('ai-count').value = '20';
+  
+  // Bug #2 fix: Restore remembered email instead of clearing
+  const rememberCheckbox = document.getElementById('remember-email');
+  const emailField = document.getElementById('profile-email');
+  const savedEmail = localStorage.getItem('feelinks_email');
+  const shouldRemember = localStorage.getItem('feelinks_remember_email') === 'true';
+  
+  rememberCheckbox.checked = shouldRemember;
+  if (shouldRemember && savedEmail) {
+    emailField.value = savedEmail;
+  } else {
+    emailField.value = '';
+  }
   
   // Reset output language selector to TC
   setOutputLang('tc');
@@ -2542,12 +2623,15 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
   });
 });
 
-// Toast
+// Toast - Bug #3 fix: more prominent, with icons and longer duration
 function showToast(message, type = '') {
   const toast = document.getElementById('toast');
-  toast.textContent = message;
+  const icons = { success: '✅ ', error: '❌ ', '': '' };
+  toast.innerHTML = (icons[type] || '') + message;
   toast.className = 'toast show ' + type;
-  setTimeout(() => toast.classList.remove('show'), 3000);
+  // Show success for 5 seconds, errors for 4 seconds, others for 3 seconds
+  const duration = type === 'success' ? 5000 : (type === 'error' ? 4000 : 3000);
+  setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 // Event bindings
@@ -2597,6 +2681,33 @@ document.addEventListener('DOMContentLoaded', () => {
     // Default view is now create-profile, so load categories immediately
     loadGeneralCategories();
     populateResearchTypes();
+  }
+  
+  // Bug #2 fix: Initialize remembered email on page load
+  const savedEmail = localStorage.getItem('feelinks_email');
+  const shouldRemember = localStorage.getItem('feelinks_remember_email') === 'true';
+  const emailField = document.getElementById('profile-email');
+  const rememberCheckbox = document.getElementById('remember-email');
+  
+  if (shouldRemember && savedEmail && emailField && rememberCheckbox) {
+    emailField.value = savedEmail;
+    rememberCheckbox.checked = true;
+  }
+  
+  // Bug #2 fix: Update localStorage when remember checkbox changes
+  if (rememberCheckbox) {
+    rememberCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        const currentEmail = document.getElementById('profile-email').value.trim();
+        if (currentEmail) {
+          localStorage.setItem('feelinks_email', currentEmail);
+        }
+        localStorage.setItem('feelinks_remember_email', 'true');
+      } else {
+        localStorage.removeItem('feelinks_email');
+        localStorage.setItem('feelinks_remember_email', 'false');
+      }
+    });
   }
 });
 </script>
