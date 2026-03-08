@@ -517,6 +517,63 @@
       font-weight: 400;
     }
     
+    /* === Quote / 金句 Display === */
+    .question-quote {
+      margin-top: 22px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.13);
+      border-left: 3px solid rgba(255,255,255,0.45);
+      border-radius: 0 12px 12px 0;
+      backdrop-filter: blur(8px);
+      text-align: left;
+      max-width: 90%;
+      animation: fadeInQuote 0.6s ease-out 0.3s both;
+    }
+    @keyframes fadeInQuote {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .question-quote .quote-icon {
+      font-size: 1.1em;
+      margin-bottom: 6px;
+      opacity: 0.8;
+    }
+    .question-quote .quote-body {
+      font-size: 0.88em;
+      line-height: 1.55;
+      font-style: italic;
+      opacity: 0.95;
+    }
+    .question-quote .quote-body-en {
+      font-size: 0.82em;
+      line-height: 1.45;
+      opacity: 0.85;
+      margin-top: 6px;
+    }
+    .question-quote .quote-source {
+      font-size: 0.75em;
+      margin-top: 8px;
+      opacity: 0.75;
+      text-align: right;
+    }
+    .question-quote.hidden { display: none; }
+    
+    .quote-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1.5px solid var(--brown-light);
+      background: var(--cream);
+      color: var(--brown);
+      font-size: 0.8em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .quote-toggle-btn:hover { background: var(--beige); }
+    .quote-toggle-btn.active { background: var(--brown); color: white; border-color: var(--brown); }
+    
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -883,6 +940,8 @@
     @media (max-width: 768px) {
       .app-title { font-size: 1.6em; }
       .question-text { font-size: 1.3em; }
+      .question-quote { max-width: 95%; padding: 12px 14px; }
+      .question-quote .quote-body { font-size: 0.85em; }
       .stats { grid-template-columns: 1fr; gap: 12px; }
       .nav-tabs { flex-wrap: wrap; }
       .nav-tab { padding: 12px 8px; font-size: 0.85em; }
@@ -1124,6 +1183,13 @@
         </button>
         <button id="btn-safe" class="btn btn-brown btn-small">
           <span data-i18n="btnSafe">🛑 安全詞</span>
+        </button>
+      </div>
+      
+      <!-- Quote Toggle -->
+      <div style="text-align: center; margin-top: 8px;">
+        <button id="btn-quote-toggle" class="quote-toggle-btn active" onclick="toggleQuotes()">
+          💭 <span data-i18n="btnQuote">金句</span>
         </button>
       </div>
       
@@ -1482,6 +1548,9 @@ const translations = {
     btnPass: "⏭️ 換題",
     btnNext: "➡️ 下一位",
     btnSafe: "🛑 安全詞",
+    btnQuote: "金句",
+    btnQuoteOn: "💭 金句 ON",
+    btnQuoteOff: "💭 金句 OFF",
     players: "👥 玩家",
     playerNamePlaceholder: "輸入玩家名稱",
     btnAddPlayer: "加入",
@@ -1573,6 +1642,9 @@ const translations = {
     btnPass: "⏭️ Skip",
     btnNext: "➡️ Next",
     btnSafe: "🛑 Safe Word",
+    btnQuote: "Quotes",
+    btnQuoteOn: "💭 Quotes ON",
+    btnQuoteOff: "💭 Quotes OFF",
     players: "👥 Players",
     playerNamePlaceholder: "Enter player name",
     btnAddPlayer: "Add",
@@ -1646,6 +1718,8 @@ let currentLang = localStorage.getItem('feelinks_lang') || 'tc-en';
 let state = {
   currentProfile: null,
   questions: {},
+  quotes: [],
+  showQuotes: true,
   drawnCount: 0,
   history: [],
   players: [],
@@ -1786,7 +1860,11 @@ async function loadProfiles() {
 async function selectProfile(profileId) {
   showToast(t('loading'), '');
   
-  const result = await apiCall('getProfile', { profileId });
+  // Fetch profile and quotes concurrently
+  const [result, quotesResult] = await Promise.all([
+    apiCall('getProfile', { profileId }),
+    fetchQuotes()
+  ]);
   
   if (!result.success) {
     showToast(t('loadFailed') + ': ' + result.error, 'error');
@@ -1932,6 +2010,157 @@ function getAllQuestions() {
   return all;
 }
 
+// ===== Quotes / 金句 System =====
+
+async function fetchQuotes() {
+  try {
+    const result = await apiCall('getQuotes');
+    if (result.success && result.quotes) {
+      state.quotes = result.quotes;
+    }
+  } catch (e) {
+    // Quotes are optional — silently fail
+    console.log('Quotes fetch failed (optional):', e);
+  }
+}
+
+/**
+ * Match a quote to a question's category using keyword overlap.
+ * Returns a quote object or null.
+ */
+function matchQuoteToCategory(questionCategory) {
+  if (!state.quotes || state.quotes.length === 0) return null;
+  
+  // Normalize category: remove emoji and extra whitespace
+  const cleanCat = questionCategory.replace(/[\p{Emoji_Presentation}\p{Emoji}\u200d\ufe0f]/gu, '').trim().toLowerCase();
+  
+  // Category keyword mapping: Feelinks categories → quote category/tag keywords
+  const CATEGORY_KEYWORDS = {
+    '家庭': ['家庭', 'family', '教養', '孩子', '父親'],
+    '連結': ['連結', '社交', 'connection', '關係', '友誼', '傾聽', '理解'],
+    '信仰': ['信仰', 'faith', '禱告', '神', '平安', '恩典', '靠主', '經歷'],
+    '照顧': ['照顧', 'caring', '被照顧', '安息', '重擔', '幫助'],
+    '興趣': ['興趣', 'interest', '喜歡', '放鬆'],
+    '回憶': ['回憶', 'memories', '成長', '過去'],
+    '假設': ['假設', 'what if', '想像', '未來'],
+    '情緒': ['情緒', 'emotion', '內心', '感受', '冰山', '壓抑', '真實'],
+    '勇氣': ['勇氣', 'courage', '小步', '進步', '犯錯', '原諒', '堅持'],
+    '改變': ['改變', 'change', '適應', '新造'],
+    '休息': ['休息', 'rest', '充電', '疲乏', '安息'],
+    '小確幸': ['小確幸', 'joy', '喜樂', '感恩', '微笑', '驚喜'],
+    '愛': ['愛', 'love', '相愛', '被愛', '自愛', '接納'],
+    '價值觀': ['價值', 'values', '意義', '目的'],
+    '溝通': ['溝通', 'communication', '表達', '傾聽'],
+    '依附': ['依附', 'attachment', '安全', '親密'],
+    '感恩': ['感恩', 'gratitude', '欣賞', '謝恩'],
+    '成長': ['成長', 'growth', '挑戰', '試煉', '困難', '逆境'],
+    '衝突': ['衝突', 'conflict', '爭端', '饒恕', '包容'],
+    '身份': ['身份', 'identity', '歸屬', '獨特', '自我'],
+    '意義': ['意義', 'meaning', 'purpose', '目的', '人生']
+  };
+  
+  // Find which keyword groups match the question category
+  const matchedKeywordGroups = [];
+  for (const [group, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    for (const kw of keywords) {
+      if (cleanCat.includes(kw.toLowerCase())) {
+        matchedKeywordGroups.push(keywords);
+        break;
+      }
+    }
+  }
+  
+  // Score each quote
+  const scored = [];
+  for (const quote of state.quotes) {
+    let score = 0;
+    const quoteCat = (quote.category || '').toLowerCase();
+    const quoteTags = (quote.tags || '').toLowerCase();
+    const combined = quoteCat + ' ' + quoteTags;
+    
+    // Direct category substring match
+    if (cleanCat && quoteCat.includes(cleanCat.substring(0, 2))) score += 2;
+    
+    // Check against matched keyword groups
+    for (const keywords of matchedKeywordGroups) {
+      for (const kw of keywords) {
+        if (combined.includes(kw.toLowerCase())) {
+          score += 1;
+        }
+      }
+    }
+    
+    if (score > 0) {
+      scored.push({ score, quote });
+    }
+  }
+  
+  if (scored.length === 0) return null;
+  
+  // Sort by score, then pick randomly from the top matches
+  scored.sort((a, b) => b.score - a.score);
+  const topScore = scored[0].score;
+  const topMatches = scored.filter(s => s.score >= topScore - 1);
+  
+  return topMatches[Math.floor(Math.random() * topMatches.length)].quote;
+}
+
+/**
+ * Build HTML for a quote to display inside the question card.
+ */
+function formatQuoteHtml(quote) {
+  if (!quote) return '';
+  
+  const isEN = currentLang === 'en';
+  const isBilingual = currentLang === 'tc-en';
+  
+  let quoteText = isEN ? (quote.en || quote.tc) : quote.tc;
+  let sourceText = isEN ? (quote.sourceEn || quote.sourceTc) : quote.sourceTc;
+  
+  let html = `<div class="question-quote${state.showQuotes ? '' : ' hidden'}">`;
+  html += `<div class="quote-icon">💭</div>`;
+  html += `<div class="quote-body">"${quoteText}"</div>`;
+  
+  if (isBilingual && quote.en && quote.tc) {
+    html += `<div class="quote-body-en">"${quote.en}"</div>`;
+  }
+  
+  if (sourceText) {
+    html += `<div class="quote-source">— ${sourceText}`;
+    if (isBilingual && quote.sourceEn && quote.sourceTc) {
+      html += ` / ${quote.sourceEn}`;
+    }
+    html += `</div>`;
+  }
+  
+  html += `</div>`;
+  return html;
+}
+
+/**
+ * Toggle quote display on/off.
+ */
+function toggleQuotes() {
+  state.showQuotes = !state.showQuotes;
+  
+  // Update toggle button (preserve data-i18n for language switching)
+  const btn = document.getElementById('btn-quote-toggle');
+  btn.classList.toggle('active', state.showQuotes);
+  if (state.showQuotes) {
+    btn.innerHTML = `💭 <span data-i18n="btnQuote">${t('btnQuote')}</span>`;
+  } else {
+    btn.style.opacity = '0.6';
+    btn.innerHTML = `💭 <span data-i18n="btnQuote">${t('btnQuote')}</span>`;
+  }
+  btn.style.opacity = state.showQuotes ? '1' : '0.6';
+  
+  // Show/hide any currently displayed quote
+  const quoteEl = document.querySelector('.question-quote');
+  if (quoteEl) {
+    quoteEl.classList.toggle('hidden', !state.showQuotes);
+  }
+}
+
 function getRandomQuestion(category = 'all') {
   let pool = category === 'all' 
     ? getAllQuestions() 
@@ -1970,10 +2199,14 @@ function drawQuestion() {
   if (isPink) card.classList.add('pink-theme');
   card.classList.add('animate-in');
   
+  // Match a quote to this question's category (may return null)
+  const matchedQuote = matchQuoteToCategory(q.category);
+  
   card.innerHTML = `
     <div class="question-number">#${state.drawnCount}</div>
     <div class="question-category">${q.category}</div>
     <div class="question-text">${formatQuestion(q)}</div>
+    ${matchedQuote ? formatQuoteHtml(matchedQuote) : ''}
   `;
   
   setTimeout(() => card.classList.remove('animate-in'), 400);
