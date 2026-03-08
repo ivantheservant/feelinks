@@ -22,11 +22,19 @@
     
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
+    html { overflow: hidden; }
     body {
       font-family: "Helvetica Neue", Arial, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
       background: var(--cream);
       color: var(--text-dark);
       line-height: 1.6;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    /* When embedded in iframe, hide body scroll and let parent scroll */
+    @media all {
+      body.in-iframe { overflow: hidden; }
     }
     
     .container {
@@ -2368,6 +2376,27 @@ document.getElementById('modal-safe').addEventListener('click', e => { if (e.tar
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   setLanguage(currentLang);
+  
+  // === Iframe detection & auto-resize for Wix ===
+  const isInIframe = window !== window.parent;
+  if (isInIframe) {
+    document.body.classList.add('in-iframe');
+    
+    // Send height to parent (Wix) so iframe auto-resizes — no inner scrollbar needed
+    function sendHeight() {
+      const height = document.documentElement.scrollHeight;
+      window.parent.postMessage({ type: 'setHeight', height: height }, '*');
+      // Also try Wix-specific format
+      window.parent.postMessage(JSON.stringify({ type: 'setHeight', height: height }), '*');
+    }
+    
+    // Send height on load, resize, and periodically (content changes)
+    sendHeight();
+    window.addEventListener('resize', sendHeight);
+    new MutationObserver(sendHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
+    // Fallback periodic check
+    setInterval(sendHeight, 1000);
+  }
   
   if (API_URL === 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL') {
     document.getElementById('profile-list').innerHTML = `
