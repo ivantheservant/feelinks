@@ -619,6 +619,36 @@
     .quote-toggle-btn:hover { background: var(--beige); }
     .quote-toggle-btn.active { background: var(--brown); color: white; border-color: var(--brown); }
     
+    /* Output language selector in 自訂生成 */
+    .output-lang-selector {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 4px;
+      background: var(--cream);
+      border-radius: 20px;
+      width: fit-content;
+    }
+    .output-lang-btn {
+      padding: 8px 16px;
+      border: 2px solid transparent;
+      background: transparent;
+      color: var(--brown);
+      cursor: pointer;
+      border-radius: 16px;
+      font-size: 0.85em;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .output-lang-btn:hover {
+      background: var(--beige);
+    }
+    .output-lang-btn.active {
+      background: var(--teal);
+      color: white;
+      border-color: var(--teal);
+    }
+    
     .stats {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1033,7 +1063,7 @@
 </div>
 
 <!-- ===== View: Select Profile ===== -->
-<div id="view-select-profile" class="view active">
+<div id="view-select-profile" class="view">
   <div class="card">
     <div class="card-header">
       <h2>📋 <span data-i18n="selectProfile">卡組記錄</span></h2>
@@ -1048,7 +1078,7 @@
     </div>
     
     <div class="btn-group" style="justify-content: center;">
-      <button class="btn btn-outline-teal btn-full" onclick="showView('create-profile')">
+      <button class="btn btn-teal btn-full" onclick="showView('create-profile')">
         ➕ <span data-i18n="createNewProfile">創建新卡組</span>
       </button>
     </div>
@@ -1056,10 +1086,13 @@
 </div>
 
 <!-- ===== View: Create Profile ===== -->
-<div id="view-create-profile" class="view">
+<div id="view-create-profile" class="view active">
   <div class="card">
     <div class="card-header">
       <h2>➕ <span data-i18n="createNewProfile">創建新卡組</span></h2>
+      <button type="button" class="btn btn-outline-teal btn-small" style="margin-top: 12px;" onclick="showView('select-profile'); loadProfiles();">
+        📋 <span data-i18n="viewCardRecords">卡組記錄</span>
+      </button>
     </div>
     
     <form id="form-create-profile">
@@ -1160,6 +1193,16 @@
           <div class="form-group">
             <label data-i18n="aiCount">生成數量</label>
             <input type="number" id="ai-count" value="20" min="5" max="50">
+          </div>
+          
+          <div class="form-group">
+            <label data-i18n="aiOutputLang">輸出語言</label>
+            <div class="output-lang-selector">
+              <button type="button" class="output-lang-btn active" data-output-lang="tc" onclick="setOutputLang('tc')">中</button>
+              <button type="button" class="output-lang-btn" data-output-lang="tc-en" onclick="setOutputLang('tc-en')">中+EN</button>
+              <button type="button" class="output-lang-btn" data-output-lang="en" onclick="setOutputLang('en')">EN</button>
+            </div>
+            <input type="hidden" id="ai-output-language" value="tc">
           </div>
         </div>
       </div>
@@ -1655,7 +1698,9 @@ const translations = {
     researchTypes: "心理學研究型問題",
     researchHint: "選擇 AI 將生成該類型的深度問題",
     customGeneration: "自訂生成",
-    selected: "已選"
+    selected: "已選",
+    viewCardRecords: "卡組記錄",
+    aiOutputLang: "輸出語言"
   },
   en: {
     appTitle: "Feel Interlink",
@@ -1755,7 +1800,9 @@ const translations = {
     researchTypes: "Research-Based Question Types",
     researchHint: "Select types for AI to generate deep questions",
     customGeneration: "Custom Generation",
-    selected: "selected"
+    selected: "selected",
+    viewCardRecords: "Card Set Records",
+    aiOutputLang: "Output Language"
   }
 };
 
@@ -1819,6 +1866,14 @@ function updateTranslations() {
   
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
+  });
+}
+
+// Output language selector for AI generation
+function setOutputLang(lang) {
+  document.getElementById('ai-output-language').value = lang;
+  document.querySelectorAll('.output-lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.outputLang === lang);
   });
 }
 
@@ -2035,8 +2090,12 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   };
   
   if (generateAI) {
+    // Get output language from selector
+    const outputLangCode = document.getElementById('ai-output-language').value;
+    const outputLangMap = { 'tc': '繁體中文', 'tc-en': '繁體中文+英文', 'en': 'English' };
+    
     data.aiSettings = {
-      language: '繁體中文',
+      language: outputLangMap[outputLangCode] || '繁體中文',
       groupType: document.getElementById('ai-group-type').value,
       audience: document.getElementById('ai-audience').value,
       theme: document.getElementById('ai-theme').value,
@@ -2085,6 +2144,9 @@ function resetCreateForm() {
   document.getElementById('ai-theme').value = '';
   document.getElementById('ai-categories').value = '';
   document.getElementById('ai-count').value = '20';
+  
+  // Reset output language selector to TC
+  setOutputLang('tc');
   
   // Deselect all checkboxes
   document.querySelectorAll('#general-categories .checkbox-chip.selected').forEach(chip => {
@@ -2507,7 +2569,9 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
   } else {
-    loadProfiles();
+    // Default view is now create-profile, so load categories immediately
+    loadGeneralCategories();
+    populateResearchTypes();
   }
 });
 </script>
