@@ -425,46 +425,80 @@
     
     .checkbox-item input { display: none; }
     
-    .profile-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+    /* Profile list — vertical like Team Build 記錄, but with better click feedback */
+    .profile-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
     
     .profile-card {
-      background: linear-gradient(135deg, var(--cream) 0%, white 100%);
-      padding: 25px;
-      border-radius: 18px;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 2px solid var(--beige);
-    }
-    
-    .profile-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px var(--shadow);
-      border-color: var(--teal);
-    }
-    
-    .profile-card h4 {
-      color: var(--brown);
-      margin-bottom: 10px;
-      font-size: 1.3em;
-    }
-    
-    .profile-card p {
-      color: var(--text-light);
-      font-size: 0.9em;
-      margin-bottom: 12px;
-    }
-    
-    .profile-meta {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1.5px solid var(--beige);
+      position: relative;
+      border-left: 4px solid var(--teal);
+    }
+    
+    .profile-card .pc-info { flex: 1; }
+    
+    .profile-card .pc-name {
+      font-weight: 600;
+      font-size: 1.05em;
+      color: var(--brown);
+      margin-bottom: 4px;
+    }
+    
+    .profile-card .pc-meta {
+      font-size: 0.82em;
+      color: var(--text-light);
+    }
+    
+    .profile-card .pc-desc {
       font-size: 0.85em;
       color: var(--text-light);
-      padding-top: 12px;
-      border-top: 1px solid var(--beige);
+      font-style: italic;
+      margin-top: 4px;
+    }
+    
+    /* Arrow — obvious clickable indicator */
+    .profile-card .pc-arrow {
+      font-size: 1.5em;
+      color: var(--brown-light);
+      transition: all 0.2s;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+    
+    /* Hover: lift + teal highlight + arrow slides */
+    .profile-card:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(91, 197, 212, 0.15);
+      border-color: var(--teal);
+      border-left-color: var(--teal);
+      background: #f7fcfd;
+    }
+    
+    .profile-card:hover .pc-arrow {
+      color: var(--teal);
+      transform: translateX(4px);
+    }
+    
+    .profile-card:hover .pc-name {
+      color: var(--teal-dark);
+    }
+    
+    /* Active press */
+    .profile-card:active {
+      transform: translateX(2px);
+      box-shadow: 0 1px 6px var(--shadow);
+      background: var(--cream);
     }
     
     .question-card {
@@ -1002,11 +1036,11 @@
 <div id="view-select-profile" class="view active">
   <div class="card">
     <div class="card-header">
-      <h2>🗂️ <span data-i18n="selectProfile">選擇遊戲卡組</span></h2>
-      <p data-i18n="selectProfileDesc">選擇一個卡組開始遊戲</p>
+      <h2>📋 <span data-i18n="selectProfile">卡組記錄</span></h2>
+      <p data-i18n="selectProfileDesc">點擊卡組開始遊戲</p>
     </div>
     
-    <div id="profile-list" class="profile-grid">
+    <div id="profile-list" class="profile-list">
       <div class="loading">
         <div class="loading-spinner"></div>
         <p data-i18n="loading">載入中...</p>
@@ -1526,8 +1560,8 @@ const translations = {
   tc: {
     appTitle: "感匯 Feel Interlink",
     appSubtitle: "情緒連結卡牌遊戲",
-    selectProfile: "選擇遊戲卡組",
-    selectProfileDesc: "選擇一個卡組開始遊戲",
+    selectProfile: "卡組記錄",
+    selectProfileDesc: "點擊卡組開始遊戲",
     loading: "載入中...",
     createNewProfile: "創建新卡組",
     profileName: "卡組名稱 *",
@@ -1556,6 +1590,7 @@ const translations = {
     emailHint: "輸入 Email 將問題卡組寄給你或小組長",
     emailSent: "已寄出！",
     emailFailed: "寄送失敗",
+    validationNoQuestions: "請至少選擇一個問題分類或啟用 AI 生成",
     cancel: "取消",
     createProfile: "創建卡組",
     tabPlay: "🎲 抽題",
@@ -1625,8 +1660,8 @@ const translations = {
   en: {
     appTitle: "Feel Interlink",
     appSubtitle: "Emotional Connection Card Game",
-    selectProfile: "Select Game Deck",
-    selectProfileDesc: "Choose a deck to start playing",
+    selectProfile: "Card Set Records",
+    selectProfileDesc: "Click a card set to start playing",
     loading: "Loading...",
     createNewProfile: "Create New Deck",
     profileName: "Deck Name *",
@@ -1655,6 +1690,7 @@ const translations = {
     emailHint: "Enter email to receive the question deck",
     emailSent: "Email sent!",
     emailFailed: "Email failed",
+    validationNoQuestions: "Please select at least one category or enable AI generation",
     cancel: "Cancel",
     createProfile: "Create Deck",
     tabPlay: "🎲 Draw",
@@ -1802,6 +1838,7 @@ function showView(viewId) {
   document.getElementById('view-' + viewId).classList.add('active');
   
   if (viewId === 'create-profile') {
+    resetCreateForm();
     loadGeneralCategories();
     populateResearchTypes();
   }
@@ -1814,7 +1851,12 @@ function toggleCollapsible(button) {
 }
 
 // Populate research-based question types
+let _researchTypesLoaded = false;
+
 function populateResearchTypes() {
+  // Bug #3 fix: Don't re-render if already loaded (would wipe selections)
+  if (_researchTypesLoaded) return;
+  
   const container = document.getElementById('research-types');
   const lang = currentLang === 'en' ? 'en' : 'tc';
   const types = RESEARCH_QUESTION_TYPES[lang];
@@ -1840,6 +1882,7 @@ function populateResearchTypes() {
       updateCounts();
     });
   });
+  _researchTypesLoaded = true;
 }
 
 // Update selection counts
@@ -1874,12 +1917,12 @@ async function loadProfiles() {
   
   list.innerHTML = result.profiles.map(p => `
     <div class="profile-card" onclick="selectProfile('${p.id}')">
-      <h4>${p.name}</h4>
-      <p>${p.description || p.type || ''}</p>
-      <div class="profile-meta">
-        <span>${p.questionCount} ${t('questions')}</span>
-        <span>${p.language || '繁體中文'}</span>
+      <div class="pc-info">
+        <div class="pc-name">${p.name}</div>
+        <div class="pc-meta">${p.questionCount} ${t('questions')} · ${p.type || ''} · ${p.language || '繁體中文'}${p.createdAt ? ' · ' + new Date(p.createdAt).toLocaleDateString() : ''}</div>
+        ${p.description ? `<div class="pc-desc">${p.description}</div>` : ''}
       </div>
+      <div class="pc-arrow">›</div>
     </div>
   `).join('');
 }
@@ -1908,7 +1951,12 @@ async function selectProfile(profileId) {
   showToast(t('loadSuccess'), 'success');
 }
 
+let _generalCategoriesLoaded = false;
+
 async function loadGeneralCategories() {
+  // Bug #3 fix: Don't re-render if already loaded (would wipe selections)
+  if (_generalCategoriesLoaded) return;
+  
   const container = document.getElementById('general-categories');
   const result = await apiCall('getGeneralCategories');
   
@@ -1940,6 +1988,7 @@ async function loadGeneralCategories() {
     });
   });
   
+  _generalCategoriesLoaded = true;
   updateCounts();
 }
 
@@ -1947,6 +1996,9 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   e.preventDefault();
   
   const submitBtn = document.getElementById('btn-create-submit');
+  
+  // Bug #1 fix: Prevent duplicate submission (debounce)
+  if (submitBtn.disabled) return;
   submitBtn.disabled = true;
   submitBtn.textContent = t('loading');
   
@@ -1963,6 +2015,14 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
                       document.getElementById('ai-categories').value.trim();
   
   const generateAI = selectedResearchTypes.length > 0 || hasCustomAI;
+  
+  // Bug #4 fix: Validate at least some questions selected
+  if (selectedCategories.length === 0 && !generateAI) {
+    showToast(t('validationNoQuestions'), 'error');
+    submitBtn.disabled = false;
+    submitBtn.textContent = t('createProfile');
+    return;
+  }
   
   const data = {
     name: document.getElementById('profile-name').value,
@@ -1988,9 +2048,6 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
   
   const result = await apiCall('createProfile', data);
   
-  submitBtn.disabled = false;
-  submitBtn.textContent = t('createProfile');
-  
   if (result.success) {
     let msg = `${t('createSuccess')} ${result.questionCount} ${t('questions')}`;
     
@@ -2001,14 +2058,52 @@ document.getElementById('form-create-profile').addEventListener('submit', async 
     }
     
     showToast(msg, 'success');
+    
+    // Bug #2 fix: Reset form completely
+    resetCreateForm();
+    
     showView('select-profile');
     loadProfiles();
   } else {
     showToast(t('createFailed') + ': ' + result.error, 'error');
   }
+  
+  // Re-enable button AFTER everything is done
+  submitBtn.disabled = false;
+  submitBtn.textContent = t('createProfile');
 });
 
 // Populate categories
+// Bug #2 fix: Reset create form to blank state
+function resetCreateForm() {
+  document.getElementById('profile-name').value = '';
+  document.getElementById('profile-type').value = '';
+  document.getElementById('profile-description').value = '';
+  document.getElementById('profile-email').value = '';
+  document.getElementById('ai-group-type').value = '';
+  document.getElementById('ai-audience').value = '';
+  document.getElementById('ai-theme').value = '';
+  document.getElementById('ai-categories').value = '';
+  document.getElementById('ai-count').value = '20';
+  
+  // Deselect all checkboxes
+  document.querySelectorAll('#general-categories .checkbox-chip.selected').forEach(chip => {
+    chip.classList.remove('selected');
+    const cb = chip.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = false;
+  });
+  document.querySelectorAll('#research-types .checkbox-chip.selected').forEach(chip => {
+    chip.classList.remove('selected');
+    const cb = chip.querySelector('input[type="checkbox"]');
+    if (cb) cb.checked = false;
+  });
+  
+  // Close all collapsible sections
+  document.querySelectorAll('.collapsible-section.open').forEach(s => s.classList.remove('open'));
+  
+  updateCounts();
+}
+
 function initGame() {
   populateCategories();
   populateEmotions();
