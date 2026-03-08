@@ -887,6 +887,7 @@
           <div class="loading-spinner"></div>
           <div class="loading-text" id="loading-text">🎯 AI 正在設計遊戲... Designing your games...</div>
           <div class="loading-sub" id="loading-sub">約需 30-90 秒 · Usually takes 30–90 seconds, please wait...</div>
+          <button class="btn btn-small btn-outline" style="margin-top: 20px;" onclick="cancelGeneration()">❌ 取消 Cancel</button>
         </div>
       </div>
     </div>
@@ -988,13 +989,10 @@ function showView(name) {
   if (name === 'history') loadHistory();
   if (name === 'sample') renderSample();
 
-  // If switching to create view, reset form if currently showing results or generating
+  // BUG FIX: Always reset form when switching to create view
+  // (not just when coming from result/generating)
   if (name === 'create') {
-    const resultVisible = document.getElementById('step-result').style.display === 'block';
-    const generatingVisible = document.getElementById('step-generating').style.display === 'block';
-    if (resultVisible || generatingVisible) {
-      resetForm();
-    }
+    resetForm();
   }
 }
 
@@ -1569,6 +1567,11 @@ function buildSummary() {
 }
 
 // ===== Generate =====
+// Generation state
+let generateStartTime = null;
+let generateTimer = null;
+let generateAbortController = null;
+
 function generateGames() {
   const data = getFormData();
   data.action = 'generateGames';
@@ -1582,13 +1585,27 @@ function generateGames() {
   // Show loading
   document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
   document.getElementById('step-generating').style.display = 'block';
+  
+  // Start progress timer
+  generateStartTime = Date.now();
+  updateGeneratingProgress();
+  generateTimer = setInterval(updateGeneratingProgress, 1000);
 
-  // API call via GET
+  // API call via GET with timeout
   const url = API_URL + '?action=generateGames&data=' + encodeURIComponent(JSON.stringify(data));
+  
+  // Create AbortController for timeout (120 seconds)
+  generateAbortController = new AbortController();
+  const timeoutId = setTimeout(() => {
+    generateAbortController.abort();
+  }, 120000);
 
-  fetch(url)
+  fetch(url, { signal: generateAbortController.signal })
     .then(r => r.json())
     .then(result => {
+      clearTimeout(timeoutId);
+      clearGenerateTimer();
+      
       if (result.success) {
         currentGameSetId = result.gameSetId;
         currentMarkdown = result.markdownContent;
@@ -1624,9 +1641,63 @@ function generateGames() {
       }
     })
     .catch(err => {
-      showToast('網絡錯誤：' + err.message, 'error');
+      clearTimeout(timeoutId);
+      clearGenerateTimer();
+      
+      if (err.name === 'AbortError') {
+        showToast('⏱️ 生成超時（120秒）。請稍後重試。Generation timed out. Please try again.', 'error');
+      } else {
+        showToast('網絡錯誤：' + err.message, 'error');
+      }
       goToStep(5);
     });
+}
+
+function updateGeneratingProgress() {
+  const elapsed = Math.floor((Date.now() - generateStartTime) / 1000);
+  const loadingText = document.getElementById('loading-text');
+  const loadingSub = document.getElementById('loading-sub');
+  
+  // Update elapsed time display
+  const minutes = Math.floor(elapsed / 60);
+  const seconds = elapsed % 60;
+  const timeStr = minutes > 0 ? `${minutes}分${seconds}秒` : `${seconds}秒`;
+  
+  // Progressive messages based on elapsed time
+  if (elapsed < 15) {
+    loadingText.textContent = '🎯 AI 正在設計遊戲... Designing your games...';
+  } else if (elapsed < 30) {
+    loadingText.textContent = '🎲 正在生成遊戲內容... Generating game content...';
+  } else if (elapsed < 60) {
+    loadingText.textContent = '📝 正在整理遊戲手冊... Organizing game handbook...';
+  } else if (elapsed < 90) {
+    loadingText.textContent = '✨ 快完成了... Almost done...';
+  } else {
+    loadingText.textContent = '⏳ 仍在處理中，請耐心等候... Still processing, please wait...';
+  }
+  
+  loadingSub.textContent = `已用時 ${timeStr} · Elapsed: ${timeStr} (通常需要 30-90 秒)`;
+}
+
+function clearGenerateTimer() {
+  if (generateTimer) {
+    clearInterval(generateTimer);
+    generateTimer = null;
+  }
+  // Reset loading text to initial state
+  const loadingText = document.getElementById('loading-text');
+  const loadingSub = document.getElementById('loading-sub');
+  if (loadingText) loadingText.textContent = '🎯 AI 正在設計遊戲... Designing your games...';
+  if (loadingSub) loadingSub.textContent = '約需 30-90 秒 · Usually takes 30–90 seconds, please wait...';
+}
+
+function cancelGeneration() {
+  if (generateAbortController) {
+    generateAbortController.abort();
+  }
+  clearGenerateTimer();
+  goToStep(5);
+  showToast('已取消生成 Generation cancelled', '');
 }
 
 // ===== Show Result =====
@@ -1869,6 +1940,9 @@ function resetForm() {
   showingVersion = 'winner';
   document.getElementById('btn-toggle-version').style.display = 'none';
   document.getElementById('version-badge').style.display = 'none';
+  
+  // Clear any ongoing generation timer
+  clearGenerateTimer();
   
   // === BUG FIX: Clear ALL form fields ===
   
