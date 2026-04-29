@@ -3,554 +3,392 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>戲匯 Team Build Link</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <title>🎯 團建遊戲生成器 Game Generator</title>
   <style>
     :root {
-      --primary:       #2A6049;
-      --primary-dark:  #1B3F31;
-      --primary-light: #52B788;
-      --accent:        #E9A800;
-      --accent-light:  #FFD166;
-      --success:       #2E7D32;
-      --warning:       #F57F17;
-      --danger:        #C62828;
-      --bg:            #F5FAF6;
-      --card-bg:       #FFFFFF;
-      --text:          #1A2E26;
-      --text-light:    #4A6A5A;
-      --text-muted:    #7A9A8A;
-      --border:        #C8E6C9;
-      --step-inactive: #B0BEC5;
-      --chip-bg:       #EAF5EB;
-      --chip-sel:      #A5D6A7;
-      --radius:        14px;
+      --primary: #E64A19;
+      --primary-dark: #BF360C;
+      --primary-light: #FF8A65;
+      --accent: #FF6D00;
+      --success: #43A047;
+      --warning: #FFA000;
+      --danger: #D32F2F;
+      --bg: #FFF8F0;
+      --card-bg: #FFFFFF;
+      --text: #3E2723;
+      --text-light: #795548;
+      --text-muted: #A1887F;
+      --border: #FFCCBC;
+      --step-inactive: #D7CCC8;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: "Nunito", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Microsoft JhengHei", sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
     }
 
-    /* ===== Top Nav (replaces header, no sticky for Wix embed) ===== */
-    .top-nav {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 14px 20px 10px;
-      background: var(--primary-dark);
-      border-bottom: 3px solid var(--accent);
-      text-align: center;
-    }
-    .top-nav-brand {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+    /* ===== Header ===== */
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       color: white;
-      margin-bottom: 10px;
+      padding: 20px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(230, 74, 25, 0.3);
     }
-    .brand-icon { font-size: 1.5em; }
-    .brand-name {
-      font-size: 1.25em;
-      font-weight: 800;
-      letter-spacing: -0.3px;
-    }
-    .brand-sub {
-      font-weight: 400;
-      font-size: 0.82em;
-      opacity: 0.75;
-      margin-left: 6px;
-    }
-    .top-nav-links { display: flex; gap: 6px; justify-content: center; }
-    .nav-link {
-      color: rgba(255,255,255,0.75);
+    .header h1 { font-size: 1.6em; margin-bottom: 4px; }
+    .header p { opacity: 0.9; font-size: 0.85em; }
+    .header-nav { display: flex; justify-content: center; gap: 15px; margin-top: 12px; }
+    .header-nav a {
+      color: rgba(255,255,255,0.85);
       text-decoration: none;
       font-size: 0.85em;
-      font-weight: 700;
-      padding: 6px 14px;
+      padding: 5px 12px;
       border-radius: 20px;
       transition: all 0.2s;
     }
-    .nav-link:hover, .nav-link.active {
-      background: rgba(255,255,255,0.15);
+    .header-nav a:hover, .header-nav a.active {
+      background: rgba(255,255,255,0.2);
       color: white;
     }
 
-    /* ===== Layout ===== */
-    .main-content { max-width: 700px; margin: 0 auto; padding: 20px 16px 40px; }
+    .main-content { padding: 20px; max-width: 800px; margin: 0 auto; }
+
+    /* ===== Views ===== */
     .view { display: none; }
     .view.active { display: block; }
 
     /* ===== Cards ===== */
     .card {
       background: var(--card-bg);
-      border-radius: var(--radius);
-      padding: 24px 22px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 12px rgba(42,96,73,0.08);
-      border: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 12px rgba(62, 39, 35, 0.06);
+      border: 1px solid rgba(255, 204, 188, 0.3);
     }
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary-light), var(--accent));
-    }
-    .card h2 {
-      font-size: 1.2em;
-      font-weight: 800;
-      color: var(--primary-dark);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .card h3 {
-      font-size: 1em;
-      font-weight: 700;
-      color: var(--text);
-      margin: 16px 0 10px;
-    }
+    .card h2 { color: var(--primary); margin-bottom: 15px; font-size: 1.25em; }
+    .card h3 { color: var(--text); margin: 18px 0 10px; font-size: 1.05em; }
 
-    /* ===== Step Progress ===== */
+    /* ===== Step Progress Bar ===== */
     .step-progress {
       display: flex;
-      justify-content: center;
-      gap: 0;
-      padding: 20px 10px 10px;
-      margin-bottom: 8px;
+      justify-content: space-between;
+      margin-bottom: 25px;
       position: relative;
     }
     .step-progress::before {
       content: '';
       position: absolute;
-      top: 34px;
-      left: 15%;
-      right: 15%;
-      height: 2px;
-      background: var(--border);
+      top: 16px;
+      left: 30px;
+      right: 30px;
+      height: 3px;
+      background: var(--step-inactive);
       z-index: 0;
     }
     .step-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      flex: 1;
-      cursor: pointer;
       position: relative;
       z-index: 1;
-      transition: opacity 0.2s;
+      cursor: pointer;
     }
-    .step-item:hover { opacity: 0.8; }
     .step-circle {
-      width: 32px;
-      height: 32px;
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       background: var(--step-inactive);
       color: white;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
+      font-weight: 700;
       font-size: 0.85em;
       transition: all 0.3s;
       margin-bottom: 6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .step-item.active .step-circle {
-      background: var(--primary);
-      transform: scale(1.2);
-      box-shadow: 0 3px 10px rgba(42,96,73,0.35);
-    }
-    .step-item.completed .step-circle {
-      background: var(--primary-light);
-    }
-    .step-label {
-      font-size: 0.7em;
-      font-weight: 700;
-      color: var(--text-muted);
-      text-align: center;
-      line-height: 1.3;
-    }
-    .step-item.active .step-label { color: var(--primary); }
+    .step-item.active .step-circle { background: var(--primary); transform: scale(1.1); box-shadow: 0 3px 10px rgba(230, 74, 25, 0.3); }
+    .step-item.done .step-circle { background: var(--success); }
+    .step-label { font-size: 0.7em; color: var(--text-muted); text-align: center; max-width: 70px; }
+    .step-item.active .step-label { color: var(--primary); font-weight: 600; }
 
     /* ===== Forms ===== */
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
     .form-group { margin-bottom: 18px; }
     .form-group label {
       display: block;
-      margin-bottom: 7px;
-      font-weight: 700;
-      font-size: 0.88em;
+      margin-bottom: 6px;
+      font-weight: 600;
       color: var(--text-light);
-      letter-spacing: 0.2px;
+      font-size: 0.92em;
     }
-    .form-group input[type="text"],
-    .form-group input[type="email"],
-    .form-group textarea {
+    .form-group input, .form-group select, .form-group textarea {
       width: 100%;
-      padding: 10px 14px;
+      padding: 12px 15px;
       border: 2px solid var(--border);
       border-radius: 10px;
-      font-family: inherit;
-      font-size: 0.95em;
-      color: var(--text);
+      font-size: 1em;
+      transition: border-color 0.2s;
       background: white;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
     }
-    .form-group input:focus,
-    .form-group textarea:focus {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
     }
     .form-group textarea { min-height: 80px; resize: vertical; }
-    .hint { font-size: 0.82em; color: var(--text-muted); margin-top: 5px; }
-    .label-hint { font-size: 0.82em; font-weight: 400; color: var(--text-muted); }
-    .time-input-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 6px;
-    }
-    .time-input-row input[type="number"] {
-      width: 100px;
-      padding: 10px 14px;
-      border: 2px solid var(--border);
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 1em;
-      font-weight: 700;
-      color: var(--text);
-      background: white;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      -moz-appearance: textfield;
-    }
-    .time-input-row input[type="number"]::-webkit-inner-spin-button,
-    .time-input-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .time-input-row input[type="number"]:focus {
-      border-color: var(--primary-light);
-      box-shadow: 0 0 0 3px rgba(82,183,136,0.15);
-    }
-    .time-input-row input[type="number"].input-error {
-      border-color: var(--danger);
-      box-shadow: 0 0 0 3px rgba(198,40,40,0.12);
-    }
-    .time-unit { font-size: 0.88em; font-weight: 600; color: var(--text-light); }
-    .time-warning {
-      margin-top: 8px;
-      padding: 10px 14px;
-      background: #FFF8E1;
-      border: 1.5px solid #FFD54F;
-      border-radius: 10px;
-      font-size: 0.88em;
-      color: #795548;
-      line-height: 1.5;
-    }
-    .time-warning strong { color: var(--warning); }
+    .form-group .hint { font-size: 0.82em; color: var(--text-muted); margin-top: 5px; }
 
-    /* ===== Buttons ===== */
-    .btn {
-      padding: 10px 20px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      font-weight: 700;
-      font-size: 0.9em;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      color: white;
-      box-shadow: 0 3px 10px rgba(42,96,73,0.3);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 16px rgba(42,96,73,0.4); }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-    .btn-secondary { background: var(--primary-light); color: white; }
-    .btn-outline {
-      background: transparent;
-      border: 2px solid var(--primary);
-      color: var(--primary);
-    }
-    .btn-outline:hover { background: var(--chip-bg); }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-success { background: var(--success); color: white; }
-    .btn-accent {
-      background: linear-gradient(135deg, var(--accent), #F59E0B);
-      color: var(--primary-dark);
-      font-weight: 800;
-    }
-    .btn-accent:hover { transform: translateY(-2px); box-shadow: 0 5px 16px rgba(233,168,0,0.4); }
-    .btn-small { padding: 6px 12px; font-size: 0.82em; border-radius: 8px; }
-    .btn-full { width: 100%; justify-content: center; }
-    .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
 
-    /* ===== Step Nav ===== */
-    .step-nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid var(--border);
-    }
-
-    /* ===== Radio & Chip ===== */
-    .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .radio-chip {
-      padding: 7px 14px;
-      background: var(--chip-bg);
-      border: 2px solid transparent;
-      border-radius: 22px;
-      cursor: pointer;
-      font-size: 0.88em;
-      font-weight: 700;
-      color: var(--text-light);
-      transition: all 0.18s;
-      user-select: none;
-    }
-    .radio-chip:hover { border-color: var(--primary-light); }
-    .radio-chip.selected {
-      background: var(--chip-sel);
-      border-color: var(--primary);
-      color: var(--primary-dark);
-    }
-
+    /* ===== Checkbox Chips ===== */
     .chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
     .chip {
       display: flex;
       align-items: center;
-      line-height: 1.3;
-      gap: 7px;
-      padding: 7px 13px;
-      background: var(--chip-bg);
+      gap: 8px;
+      padding: 8px 14px;
+      background: #FBE9E7;
       border: 2px solid transparent;
-      border-radius: 22px;
+      border-radius: 25px;
       cursor: pointer;
-      font-size: 0.88em;
-      font-weight: 700;
-      color: var(--text-light);
-      transition: all 0.18s;
+      transition: all 0.2s;
       user-select: none;
+      font-size: 0.9em;
     }
     .chip:hover { border-color: var(--primary-light); }
-    .chip.selected {
-      background: var(--chip-sel);
-      border-color: var(--primary);
-      color: var(--primary-dark);
-    }
+    .chip.selected { background: #FFCCBC; border-color: var(--primary); color: var(--primary-dark); font-weight: 600; }
     .chip input[type="checkbox"] {
-      width: 16px; height: 16px;
+      width: 18px;
+      height: 18px;
       accent-color: var(--primary);
       cursor: pointer;
       flex-shrink: 0;
       pointer-events: none;
     }
 
-    /* ===== Toggle ===== */
-    .toggle-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-    .toggle {
-      width: 46px; height: 26px;
-      background: #CFD8DC;
-      border-radius: 13px;
-      position: relative;
+    /* ===== Radio Chips ===== */
+    .radio-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .radio-chip {
+      padding: 10px 18px 10px 14px;
+      background: #FBE9E7;
+      border: 2px solid transparent;
+      border-radius: 25px;
       cursor: pointer;
-      transition: background 0.25s;
-      flex-shrink: 0;
+      transition: all 0.2s;
+      user-select: none;
+      font-size: 0.9em;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
-    .toggle::after {
+    .radio-chip::before {
       content: '';
-      position: absolute;
-      top: 3px; left: 3px;
-      width: 20px; height: 20px;
-      background: white;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #BCAAA4;
       border-radius: 50%;
-      transition: transform 0.25s;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+      flex-shrink: 0;
+      transition: all 0.2s;
+      background: white;
     }
-    .toggle.on { background: var(--primary-light); }
-    .toggle.on::after { transform: translateX(20px); }
-    .toggle-label { font-size: 0.9em; font-weight: 600; color: var(--text); }
-    .conditional { margin-top: 12px; padding: 14px; background: var(--chip-bg); border-radius: 10px; display: none; }
+    .radio-chip:hover { border-color: var(--primary-light); }
+    .radio-chip:hover::before { border-color: var(--primary-light); }
+    .radio-chip.selected { background: var(--primary); color: white; border-color: var(--primary); font-weight: 600; }
+    .radio-chip.selected::before {
+      border-color: white;
+      background: white;
+      box-shadow: inset 0 0 0 4px var(--primary);
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(230, 74, 25, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230, 74, 25, 0.4); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-secondary { background: var(--text-light); color: white; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+    .btn-outline:hover { background: #FBE9E7; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-small { padding: 8px 16px; font-size: 0.9em; }
+    .btn-full { width: 100%; }
+    .btn-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+
+    /* ===== Step Navigation ===== */
+    .step-nav { display: flex; justify-content: space-between; margin-top: 25px; }
+
+    /* ===== Conditional Section ===== */
+    .conditional { display: none; margin-top: 12px; padding: 15px; background: #FFF3E0; border-radius: 10px; border-left: 4px solid var(--warning); }
     .conditional.show { display: block; }
 
     /* ===== Loading ===== */
-    .loading { text-align: center; padding: 40px 20px; }
+    .loading { text-align: center; padding: 50px 20px; }
     .loading-spinner {
-      width: 44px; height: 44px;
-      border: 4px solid var(--border);
+      width: 50px; height: 50px;
+      border: 5px solid var(--border);
       border-top-color: var(--primary);
       border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-      margin: 0 auto 16px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { font-size: 1.1em; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-    .loading-sub { font-size: 0.85em; color: var(--text-muted); }
+    .loading-text { color: var(--text-light); font-size: 1.05em; }
+    .loading-sub { color: var(--text-muted); font-size: 0.85em; margin-top: 8px; }
 
-    /* ===== Summary ===== */
-    .summary-item {
-      display: flex;
-      gap: 10px;
-      padding: 10px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.92em;
-    }
-    .summary-item:last-child { border-bottom: none; }
-    .summary-icon { width: 22px; text-align: center; flex-shrink: 0; margin-top: 1px; }
-    .summary-label { font-weight: 700; color: var(--text-light); width: 130px; flex-shrink: 0; }
-    .summary-value { color: var(--text); flex: 1; }
-
-    /* ===== Generate Button (special accent) ===== */
-    #btn-generate {
-      background: linear-gradient(135deg, var(--accent) 0%, #D4900A 100%);
-      color: var(--primary-dark);
-      font-size: 1.05em;
-      font-weight: 800;
-      padding: 14px 28px;
-      box-shadow: 0 4px 14px rgba(233,168,0,0.35);
-    }
-    #btn-generate:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(233,168,0,0.5); }
-
-    /* ===== Result ===== */
+    /* ===== Result Display ===== */
     .result-actions {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid var(--border);
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #FFF3E0;
+      border-radius: 12px;
     }
-    .view-toggle { display: flex; gap: 4px; }
-    .view-toggle-btn {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 8px;
-      background: var(--chip-bg);
-      color: var(--text-light);
-      font-weight: 700;
-      font-size: 0.82em;
-      cursor: pointer;
-      font-family: inherit;
-      transition: all 0.2s;
-    }
-    .view-toggle-btn.active { background: var(--primary); color: white; }
-    .result-content { line-height: 1.75; }
-    .result-content h2 {
-      color: var(--primary-dark);
-      font-size: 1.1em;
-      margin: 20px 0 8px;
-      padding-bottom: 6px;
-      border-bottom: 2px solid var(--accent-light);
-    }
-    .result-content h3 {
-      color: var(--primary);
-      font-size: 1em;
-      margin: 14px 0 6px;
-    }
-    .result-content ul, .result-content ol { padding-left: 20px; margin: 6px 0; }
-    .result-content li { margin-bottom: 4px; }
-    .result-content strong { color: var(--primary-dark); }
-    .markdown-raw {
-      background: #F4F9F5;
+    .result-content {
+      background: white;
       border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 25px;
+      line-height: 1.8;
+      font-size: 0.95em;
+    }
+    .result-content h1 { color: var(--primary-dark); margin: 25px 0 12px; font-size: 1.5em; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+    .result-content h2 { color: var(--primary); margin: 20px 0 10px; font-size: 1.25em; }
+    .result-content h3 { color: var(--text); margin: 15px 0 8px; font-size: 1.05em; }
+    .result-content table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+    .result-content th, .result-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+    .result-content th { background: #FBE9E7; color: var(--primary-dark); font-weight: 600; }
+    .result-content hr { border: none; border-top: 2px solid var(--border); margin: 25px 0; }
+    .result-content ol, .result-content ul { padding-left: 22px; margin: 8px 0; }
+    .result-content li { margin-bottom: 5px; }
+    .result-content blockquote { border-left: 4px solid var(--primary-light); padding: 10px 15px; margin: 10px 0; background: #FFF8F0; }
+
+    /* ===== Markdown Raw View ===== */
+    .markdown-raw {
+      background: #263238;
+      color: #ECEFF1;
       border-radius: 10px;
-      padding: 16px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.82em;
-      white-space: pre-wrap;
+      padding: 20px;
+      font-family: "SFMono-Regular", "Consolas", "Liberation Mono", monospace;
+      font-size: 0.85em;
       line-height: 1.6;
+      white-space: pre-wrap;
+      word-wrap: break-word;
       max-height: 500px;
       overflow-y: auto;
     }
 
-    /* ===== History ===== */
+    /* ===== History List ===== */
     .history-card {
       display: flex;
+      justify-content: space-between;
       align-items: center;
-      gap: 14px;
-      padding: 16px 20px;
-      border: 1.5px solid var(--border);
-      border-left: 4px solid var(--primary-light);
+      padding: 15px;
+      background: #FFF3E0;
       border-radius: 12px;
       margin-bottom: 10px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      background: white;
-      position: relative;
+      transition: all 0.2s;
+      border: 1px solid transparent;
     }
-    .history-card .info { flex: 1; }
-    .history-card .info h4 {
-      font-weight: 600; font-size: 1.05em; color: var(--primary-dark);
-      margin: 0 0 4px; transition: color 0.2s;
-    }
-    .history-card .info p {
-      font-size: 0.85em; color: var(--text-muted); margin: 0;
-    }
-    .history-card .meta {
-      font-size: 0.78em; color: var(--text-muted); white-space: nowrap;
-    }
-    .history-card .hc-arrow {
-      font-size: 1.4em; color: var(--text-muted); transition: all 0.2s;
-      padding: 0 2px; flex-shrink: 0;
-    }
-    .history-card:hover {
-      transform: translateX(4px);
-      box-shadow: 0 4px 16px rgba(42, 96, 73, 0.12);
-      border-color: var(--primary-light);
-      background: #f2faf5;
-    }
-    .history-card:hover .info h4 { color: var(--primary); }
-    .history-card:hover .hc-arrow { color: var(--primary); transform: translateX(4px); }
-    .history-card:active {
-      transform: translateX(2px);
-      box-shadow: 0 1px 6px rgba(42, 96, 73, 0.08);
-    }
+    .history-card:hover { background: #FFE0B2; border-color: var(--primary-light); transform: translateX(4px); }
+    .history-card .info h4 { color: var(--primary-dark); margin-bottom: 4px; }
+    .history-card .info p { font-size: 0.82em; color: var(--text-muted); }
+    .history-card .meta { text-align: right; font-size: 0.82em; color: var(--text-muted); }
 
     /* ===== Toast ===== */
     .toast {
       position: fixed;
-      bottom: 24px;
+      bottom: 20px;
       left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: var(--primary-dark);
+      transform: translateX(-50%);
+      background: #333;
       color: white;
-      padding: 12px 22px;
-      border-radius: 30px;
-      font-weight: 700;
-      font-size: 0.9em;
-      z-index: 9999;
+      padding: 12px 24px;
+      border-radius: 8px;
+      z-index: 1000;
       opacity: 0;
-      transition: all 0.3s;
-      pointer-events: none;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.25);
-      white-space: nowrap;
+      transition: opacity 0.3s;
+      max-width: 90%;
     }
-    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.show { opacity: 1; }
     .toast.success { background: var(--success); }
     .toast.error { background: var(--danger); }
 
-    /* ===== Modal ===== */
+    /* ===== Toggle Switch ===== */
+    .toggle-row { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+    .toggle-label { font-weight: 500; }
+    .toggle {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      background: #D7CCC8;
+      border-radius: 13px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle.on { background: var(--primary); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .toggle.on::after { transform: translateX(24px); }
+
+    /* ===== View Toggle for Results ===== */
+    .view-toggle {
+      display: flex;
+      background: #FBE9E7;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .view-toggle-btn {
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 0.85em;
+      font-weight: 500;
+      color: var(--text-light);
+      transition: all 0.2s;
+    }
+    .view-toggle-btn.active { background: var(--primary); color: white; }
+
+    /* ===== Email Modal ===== */
     .modal-overlay {
       display: none;
       position: fixed;
-      inset: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.5);
       z-index: 1000;
       align-items: center;
@@ -561,27 +399,25 @@
     .modal {
       background: white;
       border-radius: 16px;
-      padding: 28px;
+      padding: 25px;
       max-width: 420px;
       width: 100%;
       box-shadow: 0 15px 40px rgba(0,0,0,0.2);
     }
-    .modal h3 { color: var(--primary-dark); margin-bottom: 16px; font-size: 1.1em; }
-
+    .modal h3 { color: var(--primary); margin-bottom: 15px; }
   </style>
 </head>
 <body>
 
-<!-- ===== TOP NAV (no header, Wix provides it) ===== -->
-<div class="top-nav">
-  <div class="top-nav-brand">
-    <span class="brand-icon">🎮</span>
-    <span class="brand-name">戲匯 <span class="brand-sub">Team Build Link</span></span>
-  </div>
-  <div class="top-nav-links">
-    <a href="#" class="nav-link active" onclick="showView('create')">✨ 新建</a>
-    <a href="#" class="nav-link" onclick="showView('history')">📋 記錄</a>
-    <a href="#" class="nav-link" onclick="showView('sample')">👀 範例</a>
+<!-- ===== HEADER ===== -->
+<div class="header">
+  <h1>🎯 團建遊戲生成器</h1>
+  <p>Team Building Game Generator</p>
+  <div class="header-nav">
+    <a href="#" class="active" onclick="showView('create')">✨ 新建</a>
+    <a href="#" onclick="showView('history')">📋 歷史記錄</a>
+    <a href="#" onclick="showView('sample')">👀 範例</a>
+    <a href="index.html" style="opacity:0.7">← 返回 Feelinks</a>
   </div>
 </div>
 
@@ -596,23 +432,23 @@
     <div class="step-progress" id="step-progress">
       <div class="step-item active" data-step="1" onclick="goToStep(1)">
         <div class="step-circle">1</div>
-        <div class="step-label">參加者<br><span style="font-size:0.75em;opacity:0.8">People</span></div>
+        <div class="step-label">參加者</div>
       </div>
       <div class="step-item" data-step="2" onclick="goToStep(2)">
         <div class="step-circle">2</div>
-        <div class="step-label">活動設定<br><span style="font-size:0.75em;opacity:0.8">Settings</span></div>
+        <div class="step-label">活動設定</div>
       </div>
       <div class="step-item" data-step="3" onclick="goToStep(3)">
         <div class="step-circle">3</div>
-        <div class="step-label">特別要求<br><span style="font-size:0.75em;opacity:0.8">Rules</span></div>
+        <div class="step-label">特別要求</div>
       </div>
       <div class="step-item" data-step="4" onclick="goToStep(4)">
         <div class="step-circle">4</div>
-        <div class="step-label">目的<br><span style="font-size:0.75em;opacity:0.8">Purpose</span></div>
+        <div class="step-label">目的</div>
       </div>
       <div class="step-item" data-step="5" onclick="goToStep(5)">
         <div class="step-circle">5</div>
-        <div class="step-label">確認<br><span style="font-size:0.75em;opacity:0.8">Confirm</span></div>
+        <div class="step-label">確認</div>
       </div>
     </div>
 
@@ -635,20 +471,20 @@
         <div class="form-group">
           <label>參加者關係 Relationship</label>
           <div class="radio-group" id="rg-relationship">
-            <div class="radio-chip" data-value="夫婦" onclick="selectRadio(this)">💑 夫婦 Couples</div>
-            <div class="radio-chip" data-value="朋友" onclick="selectRadio(this)">🤝 朋友 Friends</div>
-            <div class="radio-chip" data-value="同事" onclick="selectRadio(this)">💼 同事 Colleagues</div>
-            <div class="radio-chip" data-value="教會弟兄姊妹" onclick="selectRadio(this)">⛪ 教會 Church</div>
-            <div class="radio-chip" data-value="混合" onclick="selectRadio(this)">🌈 混合 Mixed</div>
+            <div class="radio-chip" data-value="夫婦" onclick="selectRadio(this)">💑 夫婦</div>
+            <div class="radio-chip" data-value="朋友" onclick="selectRadio(this)">🤝 朋友</div>
+            <div class="radio-chip" data-value="同事" onclick="selectRadio(this)">💼 同事</div>
+            <div class="radio-chip" data-value="教會弟兄姊妹" onclick="selectRadio(this)">⛪ 教會弟兄姊妹</div>
+            <div class="radio-chip" data-value="混合" onclick="selectRadio(this)">🌈 混合</div>
           </div>
         </div>
 
         <div class="form-group">
           <label>熟悉程度 Familiarity</label>
           <div class="radio-group" id="rg-familiarity">
-            <div class="radio-chip" data-value="初次見面" onclick="selectRadio(this)">👋 初次見面 First meet</div>
-            <div class="radio-chip" data-value="認識但不熟" onclick="selectRadio(this)">🙂 認識但不熟 Acquaintances</div>
-            <div class="radio-chip" data-value="熟悉" onclick="selectRadio(this)">😄 熟悉 Close friends</div>
+            <div class="radio-chip" data-value="初次見面" onclick="selectRadio(this)">👋 初次見面</div>
+            <div class="radio-chip" data-value="認識但不熟" onclick="selectRadio(this)">🙂 認識但不熟</div>
+            <div class="radio-chip" data-value="熟悉" onclick="selectRadio(this)">😄 熟悉</div>
           </div>
         </div>
 
@@ -656,11 +492,11 @@
           <label>是否包括兒童？ Include Children?</label>
           <div class="toggle-row">
             <div class="toggle" id="toggle-children" onclick="toggleChildren()"></div>
-            <span class="toggle-label" id="toggle-children-label">不包括兒童 No children</span>
+            <span class="toggle-label" id="toggle-children-label">不包括兒童</span>
           </div>
           <div class="conditional" id="children-section">
             <div class="form-group">
-              <label>兒童年齡範圍 Children's Age Range</label>
+              <label>兒童年齡範圍</label>
               <input type="text" id="f-childrenAgeRange" placeholder="例如：7-16">
             </div>
           </div>
@@ -668,7 +504,7 @@
 
         <div class="step-nav">
           <div></div>
-          <button class="btn btn-primary" onclick="goToStep(2)">下一步 Next →</button>
+          <button class="btn btn-primary" onclick="goToStep(2)">下一步 →</button>
         </div>
       </div>
     </div>
@@ -677,36 +513,6 @@
     <div class="step-content" id="step-2" style="display:none;">
       <div class="card">
         <h2>⚙️ 活動設定 Settings</h2>
-
-        <div class="form-group">
-          <label>遊戲類型 Game Type <span class="label-hint">（可多選 Multi-select）</span></label>
-          <div class="chip-group" id="cg-gametype">
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="破冰遊戲"> 🧊 破冰遊戲 Icebreaker
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="團隊建立"> 🤝 團隊建立 Team Building
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="競賽挑戰"> 🏆 競賽挑戰 Competition
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="創意協作"> 🎨 創意協作 Creative Collab
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="溝通分享"> 💬 溝通分享 Communication
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="信仰主題"> 🙏 信仰主題 Faith-based
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="解難任務"> 🎯 解難任務 Problem Solving
-            </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="戲劇角色扮演"> 🎭 戲劇角色扮演 Drama / Role Play
-            </label>
-          </div>
-        </div>
 
         <div class="form-group">
           <label>場地 Venue</label>
@@ -720,13 +526,12 @@
         <div class="form-row">
           <div class="form-group">
             <label>可用時間 Available Time</label>
-            <div class="time-input-row">
-              <input type="number" id="f-availableTime" min="5" max="480"
-                     placeholder="e.g. 60" oninput="clearTimeWarning()">
-              <span class="time-unit">分鐘 min</span>
+            <div class="radio-group" id="rg-time">
+              <div class="radio-chip" data-value="30分鐘" onclick="selectRadio(this)">30 min</div>
+              <div class="radio-chip" data-value="1小時" onclick="selectRadio(this)">1 hr</div>
+              <div class="radio-chip" data-value="1.5小時" onclick="selectRadio(this)">1.5 hr</div>
+              <div class="radio-chip" data-value="2小時以上" onclick="selectRadio(this)">2+ hr</div>
             </div>
-            <div class="hint">最少 5 分鐘 · Minimum 5 minutes</div>
-            <div class="time-warning" id="time-warning" style="display:none;"></div>
           </div>
           <div class="form-group">
             <label>遊戲數量 Number of Games</label>
@@ -748,8 +553,8 @@
         </div>
 
         <div class="step-nav">
-          <button class="btn btn-outline" onclick="goToStep(1)">← 上一步 Back</button>
-          <button class="btn btn-primary" onclick="goToStep2Next()">下一步 Next →</button>
+          <button class="btn btn-outline" onclick="goToStep(1)">← 上一步</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">下一步 →</button>
         </div>
       </div>
     </div>
@@ -762,50 +567,50 @@
         <div class="form-group">
           <label>特別限制（可多選）Restrictions</label>
           <div class="chip-group" id="cg-restrictions">
-            <label class="chip" onclick="toggleChip(this, event)">
+            <label class="chip" onclick="toggleChip(this)">
               <input type="checkbox" value="避免男女身體接觸">
-              🚫 避免男女身體接觸<br><span style="font-size:0.8em;opacity:0.75">No cross-gender contact</span>
+              🚫 避免男女身體接觸
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
+            <label class="chip" onclick="toggleChip(this)">
               <input type="checkbox" value="盡量不用道具（如需要只用日常物品）">
-              📦 盡量不用道具<br><span style="font-size:0.8em;opacity:0.75">Minimal props</span>
+              📦 盡量不用道具
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
+            <label class="chip" onclick="toggleChip(this)">
               <input type="checkbox" value="避免劇烈運動">
-              🏃 避免劇烈運動<br><span style="font-size:0.8em;opacity:0.75">No intense exercise</span>
+              🏃 避免劇烈運動
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
+            <label class="chip" onclick="toggleChip(this)">
               <input type="checkbox" value="適合行動不便者參與">
-              ♿ 適合行動不便者<br><span style="font-size:0.8em;opacity:0.75">Mobility friendly</span>
+              ♿ 適合行動不便者
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
+            <label class="chip" onclick="toggleChip(this)">
               <input type="checkbox" value="避免需要閱讀或書寫的遊戲">
-              ✏️ 避免閱讀/書寫<br><span style="font-size:0.8em;opacity:0.75">No reading/writing</span>
+              ✏️ 避免閱讀/書寫
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
+            <label class="chip" onclick="toggleChip(this)">
               <input type="checkbox" value="避免尷尬或太私密的互動">
-              😳 避免尷尬互動<br><span style="font-size:0.8em;opacity:0.75">No awkward moments</span>
+              😳 避免尷尬互動
             </label>
           </div>
         </div>
 
         <div class="form-group">
-          <label>其他特別要求 Other Requirements（自由輸入 Free text）</label>
-          <textarea id="f-otherRequirements" placeholder="例如：有一位輪椅使用者、場地比較小... / e.g. one wheelchair user, small venue..."></textarea>
+          <label>其他特別要求（自由輸入）</label>
+          <textarea id="f-otherRequirements" placeholder="例如：有一位輪椅使用者、場地比較小..."></textarea>
         </div>
 
         <div class="form-group">
           <label>分組要求 Grouping Rule</label>
           <div class="radio-group" id="rg-grouping">
-            <div class="radio-chip" data-value="打散夫婦/家庭分開" onclick="selectRadio(this)">🔀 打散夫婦/家庭 Split couples</div>
-            <div class="radio-chip" data-value="自由分組" onclick="selectRadio(this)">🎲 自由分組 Free groups</div>
-            <div class="radio-chip" data-value="不分組" onclick="selectRadio(this)">👤 不分組 No groups</div>
+            <div class="radio-chip" data-value="打散夫婦/家庭分開" onclick="selectRadio(this)">🔀 打散夫婦/家庭</div>
+            <div class="radio-chip" data-value="自由分組" onclick="selectRadio(this)">🎲 自由分組</div>
+            <div class="radio-chip" data-value="不分組" onclick="selectRadio(this)">👤 不分組</div>
           </div>
         </div>
 
         <div class="step-nav">
-          <button class="btn btn-outline" onclick="goToStep(2)">← 上一步 Back</button>
-          <button class="btn btn-primary" onclick="goToStep(4)">下一步 Next →</button>
+          <button class="btn btn-outline" onclick="goToStep(2)">← 上一步</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">下一步 →</button>
         </div>
       </div>
     </div>
@@ -816,25 +621,25 @@
         <h2>🎯 活動目的 Purpose</h2>
 
         <div class="form-group">
-          <label>活動目的 Purpose（可多選 Multi-select）</label>
+          <label>活動目的（可多選）</label>
           <div class="chip-group" id="cg-purposes">
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="破冰認識"> 🧊 破冰認識 Icebreaker
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="破冰認識"> 🧊 破冰認識
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="增進感情"> 💕 增進感情 Bonding
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="增進感情"> 💕 增進感情
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="信仰反思"> ✝️ 信仰反思 Faith reflection
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="信仰反思"> ✝️ 信仰反思
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="團隊合作"> 🤝 團隊合作 Teamwork
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="團隊合作"> 🤝 團隊合作
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="純粹好玩"> 🎉 純粹好玩 Just for fun
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="純粹好玩"> 🎉 純粹好玩
             </label>
-            <label class="chip" onclick="toggleChip(this, event)">
-              <input type="checkbox" value="價值觀探索"> 💡 價值觀探索 Values exploration
+            <label class="chip" onclick="toggleChip(this)">
+              <input type="checkbox" value="價值觀探索"> 💡 價值觀探索
             </label>
           </div>
         </div>
@@ -843,24 +648,24 @@
           <label>每個遊戲附帶反思分享問題？ Include Debrief?</label>
           <div class="toggle-row">
             <div class="toggle on" id="toggle-debrief" onclick="toggleDebrief()"></div>
-            <span class="toggle-label" id="toggle-debrief-label">包含反思問題 Include debrief</span>
+            <span class="toggle-label" id="toggle-debrief-label">包含反思問題（含聖經經文）</span>
           </div>
         </div>
 
         <div class="form-group">
           <label>其他補充說明 Additional Notes</label>
-          <textarea id="f-additionalNotes" placeholder="例如：是退修會的其中一環 / e.g. part of a retreat, want everyone to know each other better..."></textarea>
+          <textarea id="f-additionalNotes" placeholder="例如：是退修會的其中一環、想讓大家更多認識彼此..."></textarea>
         </div>
 
         <div class="form-group">
-          <label>📧 完成後寄送到 Email（選填 Optional）</label>
+          <label>📧 完成後寄送到 Email（選填）</label>
           <input type="email" id="f-email" placeholder="your@email.com">
-          <div class="hint">生成完成後會自動發送遊戲手冊到此信箱 · Game booklet will be emailed upon completion</div>
+          <div class="hint">生成完成後會自動發送遊戲手冊到此信箱</div>
         </div>
 
         <div class="step-nav">
-          <button class="btn btn-outline" onclick="goToStep(3)">← 上一步 Back</button>
-          <button class="btn btn-primary" onclick="goToStep(5)">確認 Confirm →</button>
+          <button class="btn btn-outline" onclick="goToStep(3)">← 上一步</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">確認 & 預覽 →</button>
         </div>
       </div>
     </div>
@@ -868,13 +673,13 @@
     <!-- STEP 5: Confirm & Generate -->
     <div class="step-content" id="step-5" style="display:none;">
       <div class="card">
-        <h2>✅ 確認生成 Confirm & Generate</h2>
+        <h2>✅ 確認生成 Confirm</h2>
         <div id="summary-content" style="line-height: 1.8;"></div>
 
         <div class="step-nav" style="margin-top: 20px;">
-          <button class="btn btn-outline" onclick="goToStep(4)">← 修改 Edit</button>
+          <button class="btn btn-outline" onclick="goToStep(4)">← 修改</button>
           <button class="btn btn-primary btn-full" id="btn-generate" onclick="generateGames()">
-            🎯 ✨ 生成遊戲 Let's Go!
+            🎯 生成遊戲手冊
           </button>
         </div>
       </div>
@@ -885,9 +690,8 @@
       <div class="card">
         <div class="loading">
           <div class="loading-spinner"></div>
-          <div class="loading-text" id="loading-text">🎯 AI 正在設計遊戲... Designing your games...</div>
-          <div class="loading-sub" id="loading-sub">約需 30-90 秒 · Usually takes 30–90 seconds, please wait...</div>
-          <button class="btn btn-small btn-outline" style="margin-top: 20px;" onclick="cancelGeneration()">❌ 取消 Cancel</button>
+          <div class="loading-text">🎯 AI 正在設計遊戲...</div>
+          <div class="loading-sub">通常需要 20-40 秒，請稍候</div>
         </div>
       </div>
     </div>
@@ -900,12 +704,10 @@
             <button class="view-toggle-btn active" onclick="switchResultView('formatted', this)">📖 格式化</button>
             <button class="view-toggle-btn" onclick="switchResultView('markdown', this)">📝 Markdown</button>
           </div>
-          <button class="btn btn-small btn-outline" onclick="copyMarkdown()">📋 複製 Copy Markdown</button>
-          <button class="btn btn-small btn-outline" onclick="openEmailModal()">📧 發送 Send Email</button>
-          <button class="btn btn-small btn-secondary" onclick="resetForm()">✨ 再生成一組 Generate Again</button>
-          <button class="btn btn-small btn-outline" id="btn-toggle-version" style="display:none;" onclick="toggleVersion()">🔄 查看另一版本 See alternative</button>
+          <button class="btn btn-small btn-outline" onclick="copyMarkdown()">📋 複製 Markdown</button>
+          <button class="btn btn-small btn-outline" onclick="openEmailModal()">📧 發送 Email</button>
+          <button class="btn btn-small btn-secondary" onclick="resetForm()">✨ 再生成一組</button>
         </div>
-        <div id="version-badge" style="display:none; margin:8px 0 4px; font-size:12px; color:#666;"></div>
 
         <div id="result-formatted" class="result-content"></div>
         <div id="result-markdown" class="markdown-raw" style="display:none;"></div>
@@ -936,7 +738,7 @@
     <div class="card" style="padding: 15px;">
       <div class="result-actions">
         <span style="font-weight:600; color:var(--primary); padding:8px;">👀 輸出範例 — 生成結果大概像這樣</span>
-        <button class="btn btn-small btn-primary" onclick="showView('create');">✨ 開始生成自己的</button>
+        <button class="btn btn-small btn-primary" onclick="showView('create'); document.querySelector('.header-nav a').click();">✨ 開始生成自己的</button>
       </div>
       <div class="result-content" id="sample-content"></div>
     </div>
@@ -947,14 +749,14 @@
 <!-- EMAIL MODAL -->
 <div class="modal-overlay" id="email-modal">
   <div class="modal">
-    <h3>📧 發送遊戲手冊 Send Game Booklet</h3>
+    <h3>📧 發送遊戲手冊</h3>
     <div class="form-group">
-      <label>Email 地址 Email Address</label>
+      <label>Email 地址</label>
       <input type="email" id="modal-email" placeholder="your@email.com">
     </div>
     <div class="btn-group">
-      <button class="btn btn-primary" onclick="sendEmail()">📧 發送 Send</button>
-      <button class="btn btn-outline" onclick="closeEmailModal()">取消 Cancel</button>
+      <button class="btn btn-primary" onclick="sendEmail()">📧 發送</button>
+      <button class="btn btn-outline" onclick="closeEmailModal()">取消</button>
     </div>
   </div>
 </div>
@@ -972,10 +774,6 @@ let includeChildren = false;
 let includeDebrief = true;
 let currentGameSetId = null;
 let currentMarkdown = '';
-let currentMarkdownA = '';
-let currentMarkdownB = '';
-let currentWinner = 'A';
-let showingVersion = 'winner';
 
 // ===== View Switching =====
 function showView(name) {
@@ -983,17 +781,11 @@ function showView(name) {
   document.getElementById('view-' + name).classList.add('active');
 
   // Update nav active state
-  document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'));
+  document.querySelectorAll('.header-nav a').forEach(a => a.classList.remove('active'));
   if (event && event.target) event.target.classList.add('active');
 
   if (name === 'history') loadHistory();
   if (name === 'sample') renderSample();
-
-  // BUG FIX: Always reset form when switching to create view
-  // (not just when coming from result/generating)
-  if (name === 'create') {
-    resetForm();
-  }
 }
 
 // ===== Sample Data =====
@@ -1368,88 +1160,17 @@ function goToStep(step) {
 }
 
 // ===== Radio Chips =====
-
-// ===== Time Warning Mins by Game Type =====
-const GAME_TYPE_MIN_TIMES = {
-  '破冰遊戲':   10,
-  '團隊建立':   20,
-  '競賽挑戰':   15,
-  '創意協作':   20,
-  '溝通分享':   15,
-  '信仰主題':   20,
-  '解難任務':   20,
-  '戲劇角色扮演': 15,
-};
-
-function clearTimeWarning() {
-  document.getElementById('time-warning').style.display = 'none';
-  document.getElementById('f-availableTime').classList.remove('input-error');
-}
-
-function goToStep2Next() {
-  const timeVal = parseInt(document.getElementById('f-availableTime').value, 10);
-  const warningEl = document.getElementById('time-warning');
-
-  // Hard block: under 5 min or empty
-  if (!timeVal || timeVal < 5) {
-    document.getElementById('f-availableTime').classList.add('input-error');
-    warningEl.innerHTML = '⚠️ <strong>請輸入至少 5 分鐘 / Please enter at least 5 minutes.</strong>';
-    warningEl.style.display = 'block';
-    return;
-  }
-
-  // Soft warn: time too short for selected game types
-  const selectedTypes = getSelectedChips('cg-gametype');
-  let warnMessages = [];
-  selectedTypes.forEach(type => {
-    const minTime = GAME_TYPE_MIN_TIMES[type];
-    if (minTime && timeVal < minTime) {
-      warnMessages.push(`<strong>${type}</strong> 建議至少 ${minTime} 分鐘 (recommended min ${minTime} min)`);
-    }
-  });
-
-  if (warnMessages.length > 0 && warningEl.style.display !== 'block') {
-    // Show warning, add "Proceed anyway" button
-    warningEl.innerHTML =
-      '⚠️ 時間可能不足 Time may be tight:<br>' +
-      warnMessages.join('<br>') +
-      '<br><br>' +
-      '<button class="btn btn-small btn-outline" style="margin-right:8px" onclick="clearTimeWarning()">' +
-        '← 返回調整 Adjust time' +
-      '</button>' +
-      '<button class="btn btn-small btn-primary" onclick="clearTimeWarning(); goToStep(3);">' +
-        '繼續 Proceed anyway →' +
-      '</button>';
-    warningEl.style.display = 'block';
-    return;
-  }
-
-  goToStep(3);
-}
-
 function selectRadio(el) {
   const group = el.parentElement;
   group.querySelectorAll('.radio-chip').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
-  
-  // Update debrief label if relationship changed (faith context check)
-  if (group.id === 'rg-relationship') {
-    updateDebriefLabel();
-  }
 }
 
 // ===== Checkbox Chips =====
-function toggleChip(el, event) {
-  if (event) event.preventDefault(); // stop browser double-firing label→checkbox
+function toggleChip(el) {
   el.classList.toggle('selected');
   const cb = el.querySelector('input[type="checkbox"]');
   if (cb) cb.checked = el.classList.contains('selected');
-  
-  // Update debrief label if game type or purpose changed (faith context check)
-  const chipGroup = el.closest('.chip-group');
-  if (chipGroup && (chipGroup.id === 'cg-gametype' || chipGroup.id === 'cg-purposes')) {
-    updateDebriefLabel();
-  }
 }
 
 // ===== Toggles =====
@@ -1460,7 +1181,7 @@ function toggleChildren() {
   const section = document.getElementById('children-section');
 
   toggle.classList.toggle('on', includeChildren);
-  label.textContent = includeChildren ? '包括兒童 ✓' : '不包括兒童 No children';
+  label.textContent = includeChildren ? '包括兒童 ✓' : '不包括兒童';
   section.classList.toggle('show', includeChildren);
 }
 
@@ -1470,32 +1191,7 @@ function toggleDebrief() {
   const label = document.getElementById('toggle-debrief-label');
 
   toggle.classList.toggle('on', includeDebrief);
-  updateDebriefLabel();
-}
-
-// Update debrief label based on faith context
-function updateDebriefLabel() {
-  const label = document.getElementById('toggle-debrief-label');
-  if (!label) return;
-  
-  // Check if faith context is selected
-  const relationship = getSelectedRadio('rg-relationship');
-  const gameTypes = getSelectedChips('cg-gametype');
-  const purposes = getSelectedChips('cg-purposes');
-  
-  const isFaithContext = relationship === '教會弟兄姊妹' || 
-                         gameTypes.includes('信仰主題') || 
-                         purposes.includes('信仰反思');
-  
-  if (includeDebrief) {
-    if (isFaithContext) {
-      label.textContent = '包含反思問題 Include debrief（含聖經經文 with Bible verses）';
-    } else {
-      label.textContent = '包含反思問題 Include debrief';
-    }
-  } else {
-    label.textContent = '不包含反思問題 No debrief';
-  }
+  label.textContent = includeDebrief ? '包含反思問題（含聖經經文）' : '不包含反思問題';
 }
 
 // ===== Get Form Values =====
@@ -1522,8 +1218,7 @@ function getFormData() {
     includeChildren: includeChildren ? 'yes' : 'no',
     childrenAgeRange: includeChildren ? document.getElementById('f-childrenAgeRange').value.trim() : '',
     venue: getSelectedRadio('rg-venue'),
-    availableTime: (document.getElementById('f-availableTime').value.trim() || '') + (document.getElementById('f-availableTime').value.trim() ? '分鐘' : ''),
-    gameTypes: getSelectedChips('cg-gametype').join('、'),
+    availableTime: getSelectedRadio('rg-time'),
     gameCount: getSelectedRadio('rg-gamecount') || '3',
     language: getSelectedRadio('rg-language') || '繁體中文',
     specialRequirements: allRequirements,
@@ -1551,7 +1246,6 @@ function buildSummary() {
   if (d.includeChildren === 'yes') {
     addLine('👶', '兒童', `包括（${d.childrenAgeRange} 歲）`);
   }
-  if (d.gameTypes) addLine('🎮', '遊戲類型 Type', d.gameTypes);
   addLine('🏠', '場地', d.venue);
   addLine('⏱️', '時間', d.availableTime);
   addLine('🎮', '遊戲數量', d.gameCount);
@@ -1567,68 +1261,24 @@ function buildSummary() {
 }
 
 // ===== Generate =====
-// Generation state
-let generateStartTime = null;
-let generateTimer = null;
-let generateAbortController = null;
-
 function generateGames() {
   const data = getFormData();
   data.action = 'generateGames';
 
-  // Reset dual-version state
-  currentMarkdownA = '';
-  currentMarkdownB = '';
-  currentWinner = 'A';
-  showingVersion = 'winner';
-
   // Show loading
   document.querySelectorAll('.step-content').forEach(s => s.style.display = 'none');
   document.getElementById('step-generating').style.display = 'block';
-  
-  // Start progress timer
-  generateStartTime = Date.now();
-  updateGeneratingProgress();
-  generateTimer = setInterval(updateGeneratingProgress, 1000);
 
-  // API call via GET with timeout
+  // API call via GET (encode data as JSON in URL param)
   const url = API_URL + '?action=generateGames&data=' + encodeURIComponent(JSON.stringify(data));
-  
-  // Create AbortController for timeout (120 seconds)
-  generateAbortController = new AbortController();
-  const timeoutId = setTimeout(() => {
-    generateAbortController.abort();
-  }, 120000);
 
-  fetch(url, { signal: generateAbortController.signal })
+  fetch(url)
     .then(r => r.json())
     .then(result => {
-      clearTimeout(timeoutId);
-      clearGenerateTimer();
-      
       if (result.success) {
         currentGameSetId = result.gameSetId;
         currentMarkdown = result.markdownContent;
-
-        // Store dual versions
-        currentMarkdownA = result.markdownA || result.markdownContent;
-        currentMarkdownB = result.markdownB || result.markdownContent;
-        currentWinner = result.winner || 'A';
-
         showResult(result.markdownContent);
-
-        // Show toggle button if two different versions exist
-        const toggleBtn = document.getElementById('btn-toggle-version');
-        const badge = document.getElementById('version-badge');
-        if (result.hasRefs && currentMarkdownA !== currentMarkdownB) {
-          toggleBtn.style.display = 'inline-block';
-          const winLabel = currentWinner === 'A' ? '📚 參考版 Reference' : '🤖 原創版 Original';
-          badge.innerHTML = '✅ AI 推薦：' + winLabel + '（' + result.refCount + ' 個參考遊戲匹配）';
-          badge.style.display = 'block';
-        } else {
-          toggleBtn.style.display = 'none';
-          badge.style.display = 'none';
-        }
 
         if (result.emailError) {
           showToast('遊戲已生成，但 Email 發送失敗：' + result.emailError, 'error');
@@ -1641,63 +1291,9 @@ function generateGames() {
       }
     })
     .catch(err => {
-      clearTimeout(timeoutId);
-      clearGenerateTimer();
-      
-      if (err.name === 'AbortError') {
-        showToast('⏱️ 生成超時（120秒）。請稍後重試。Generation timed out. Please try again.', 'error');
-      } else {
-        showToast('網絡錯誤：' + err.message, 'error');
-      }
+      showToast('網絡錯誤：' + err.message, 'error');
       goToStep(5);
     });
-}
-
-function updateGeneratingProgress() {
-  const elapsed = Math.floor((Date.now() - generateStartTime) / 1000);
-  const loadingText = document.getElementById('loading-text');
-  const loadingSub = document.getElementById('loading-sub');
-  
-  // Update elapsed time display
-  const minutes = Math.floor(elapsed / 60);
-  const seconds = elapsed % 60;
-  const timeStr = minutes > 0 ? `${minutes}分${seconds}秒` : `${seconds}秒`;
-  
-  // Progressive messages based on elapsed time
-  if (elapsed < 15) {
-    loadingText.textContent = '🎯 AI 正在設計遊戲... Designing your games...';
-  } else if (elapsed < 30) {
-    loadingText.textContent = '🎲 正在生成遊戲內容... Generating game content...';
-  } else if (elapsed < 60) {
-    loadingText.textContent = '📝 正在整理遊戲手冊... Organizing game handbook...';
-  } else if (elapsed < 90) {
-    loadingText.textContent = '✨ 快完成了... Almost done...';
-  } else {
-    loadingText.textContent = '⏳ 仍在處理中，請耐心等候... Still processing, please wait...';
-  }
-  
-  loadingSub.textContent = `已用時 ${timeStr} · Elapsed: ${timeStr} (通常需要 30-90 秒)`;
-}
-
-function clearGenerateTimer() {
-  if (generateTimer) {
-    clearInterval(generateTimer);
-    generateTimer = null;
-  }
-  // Reset loading text to initial state
-  const loadingText = document.getElementById('loading-text');
-  const loadingSub = document.getElementById('loading-sub');
-  if (loadingText) loadingText.textContent = '🎯 AI 正在設計遊戲... Designing your games...';
-  if (loadingSub) loadingSub.textContent = '約需 30-90 秒 · Usually takes 30–90 seconds, please wait...';
-}
-
-function cancelGeneration() {
-  if (generateAbortController) {
-    generateAbortController.abort();
-  }
-  clearGenerateTimer();
-  goToStep(5);
-  showToast('已取消生成 Generation cancelled', '');
 }
 
 // ===== Show Result =====
@@ -1718,26 +1314,6 @@ function switchResultView(view, btn) {
 
   document.getElementById('result-formatted').style.display = view === 'formatted' ? 'block' : 'none';
   document.getElementById('result-markdown').style.display = view === 'markdown' ? 'block' : 'none';
-}
-
-function toggleVersion() {
-  if (showingVersion === 'winner') {
-    const altMarkdown = (currentWinner === 'A') ? currentMarkdownB : currentMarkdownA;
-    showResult(altMarkdown);
-    currentMarkdown = altMarkdown;
-    showingVersion = 'alt';
-    document.getElementById('btn-toggle-version').innerHTML = '🔄 返回推薦版 Back to recommended';
-    const altLabel = (currentWinner === 'A') ? '🤖 原創版 Original' : '📚 參考版 Reference';
-    document.getElementById('version-badge').innerHTML = '👀 目前顯示：' + altLabel;
-  } else {
-    const winMarkdown = (currentWinner === 'A') ? currentMarkdownA : currentMarkdownB;
-    showResult(winMarkdown);
-    currentMarkdown = winMarkdown;
-    showingVersion = 'winner';
-    document.getElementById('btn-toggle-version').innerHTML = '🔄 查看另一版本 See alternative';
-    const winLabel = (currentWinner === 'A') ? '📚 參考版 Reference' : '🤖 原創版 Original';
-    document.getElementById('version-badge').innerHTML = '✅ AI 推薦：' + winLabel;
-  }
 }
 
 // ===== Simple Markdown Renderer =====
@@ -1879,7 +1455,6 @@ function loadHistory() {
             <div class="meta">
               ${g.createdAt ? new Date(g.createdAt).toLocaleDateString() : ''}
             </div>
-            <div class="hc-arrow">›</div>
           </div>
         `).join('');
       } else {
@@ -1902,14 +1477,6 @@ function loadGameSet(gameSetId) {
         currentGameSetId = result.gameSet.id;
         currentMarkdown = result.gameSet.markdownContent;
 
-        // Reset dual-version state (history has single version only)
-        currentMarkdownA = '';
-        currentMarkdownB = '';
-        currentWinner = 'A';
-        showingVersion = 'winner';
-        document.getElementById('btn-toggle-version').style.display = 'none';
-        document.getElementById('version-badge').style.display = 'none';
-
         // Switch to create view and show result
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById('view-create').classList.add('active');
@@ -1931,94 +1498,9 @@ function resetForm() {
   // Reset to step 1
   goToStep(1);
 
-  // Clear internal state
+  // Clear selections (keep defaults)
   currentGameSetId = null;
   currentMarkdown = '';
-  currentMarkdownA = '';
-  currentMarkdownB = '';
-  currentWinner = 'A';
-  showingVersion = 'winner';
-  document.getElementById('btn-toggle-version').style.display = 'none';
-  document.getElementById('version-badge').style.display = 'none';
-  
-  // Clear any ongoing generation timer
-  clearGenerateTimer();
-  
-  // === BUG FIX: Clear ALL form fields ===
-  
-  // Step 1: Clear radio chips (relationship, familiarity)
-  document.querySelectorAll('#step-1 .radio-chip').forEach(chip => {
-    chip.classList.remove('selected');
-  });
-  // Clear text inputs in step 1
-  const ageRange = document.getElementById('f-ageRange');
-  const participantCount = document.getElementById('f-participantCount');
-  if (ageRange) ageRange.value = '';
-  if (participantCount) participantCount.value = '';
-  // Clear children toggle and fields
-  const childrenToggle = document.getElementById('toggle-children');
-  if (childrenToggle) {
-    childrenToggle.classList.remove('on');
-    const childrenFields = document.getElementById('children-fields');
-    if (childrenFields) childrenFields.style.display = 'none';
-    const childrenSection = document.getElementById('children-section');
-    if (childrenSection) childrenSection.classList.remove('show');
-  }
-  // Reset includeChildren state
-  includeChildren = false;
-  const childrenLabel = document.getElementById('toggle-children-label');
-  if (childrenLabel) childrenLabel.textContent = '不包括兒童 No children';
-  const childrenAgeRange = document.getElementById('f-childrenAgeRange');
-  if (childrenAgeRange) childrenAgeRange.value = '';
-  
-  // Step 2: Clear game type checkboxes and radio chips
-  document.querySelectorAll('#step-2 .chip input[type="checkbox"]').forEach(cb => {
-    cb.checked = false;
-    cb.closest('.chip').classList.remove('selected');
-  });
-  document.querySelectorAll('#step-2 .radio-chip').forEach(chip => {
-    chip.classList.remove('selected');
-  });
-  // Set default language to 繁體中文
-  const langChip = document.querySelector('#step-2 .radio-chip[data-value="繁體中文"]');
-  if (langChip) langChip.classList.add('selected');
-  // Clear available time
-  const availableTime = document.getElementById('f-availableTime');
-  if (availableTime) availableTime.value = '';
-  
-  // Step 3: Clear restrictions checkboxes and radio chips
-  document.querySelectorAll('#step-3 .chip input[type="checkbox"]').forEach(cb => {
-    cb.checked = false;
-    cb.closest('.chip').classList.remove('selected');
-  });
-  document.querySelectorAll('#step-3 .radio-chip').forEach(chip => {
-    chip.classList.remove('selected');
-  });
-  // Clear additional notes / other requirements
-  const otherRequirements = document.getElementById('f-otherRequirements');
-  if (otherRequirements) otherRequirements.value = '';
-  const additionalNotes = document.getElementById('f-additionalNotes');
-  if (additionalNotes) additionalNotes.value = '';
-  
-  // Step 4: Clear purpose checkboxes
-  document.querySelectorAll('#step-4 .chip input[type="checkbox"]').forEach(cb => {
-    cb.checked = false;
-    cb.closest('.chip').classList.remove('selected');
-  });
-  // Reset debrief toggle to ON (default)
-  const debriefToggle = document.getElementById('toggle-debrief');
-  const debriefLabel = document.getElementById('toggle-debrief-label');
-  if (debriefToggle) {
-    debriefToggle.classList.add('on');
-    // Reset to non-faith context label (no Bible reference)
-    if (debriefLabel) debriefLabel.textContent = '包含反思問題 Include debrief';
-  }
-  // Reset includeDebrief state
-  includeDebrief = true;
-  
-  // Clear email field
-  const emailField = document.getElementById('f-email');
-  if (emailField) emailField.value = '';
 }
 
 // ===== Toast =====
